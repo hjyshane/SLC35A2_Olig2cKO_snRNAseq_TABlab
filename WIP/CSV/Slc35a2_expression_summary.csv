@@ -1,0 +1,170 @@
+"","ref_short","Genotype","Timepoint","TimeGeno","lineage_group","n_cells","n_expressed","percent_expressed","expression_level","expression_all_cells"
+"1","MFOL","cKO","P08","P08_cKO","Oligodendrocytes",1,1,100,0.93,0.93
+"2","Trilaminar","cKO","P00","P00_cKO","Other",1,1,100,0.7,0.7
+"3","Ex_Cortex","cKO","P00","P00_cKO","Excitatory Neuron",8,7,87.5,0.74,0.65
+"4","Ependymal","Control","P00","P00_Control","Other",23,19,82.61,1.4,1.16
+"5","Ependymal","cKO","P00","P00_cKO","Other",52,42,80.77,1.32,1.07
+"6","Ependymal","cKO","P08","P08_cKO","Other",169,125,73.96,1.39,1.03
+"7","Ex_CA1","Control","P00","P00_Control","Excitatory Neuron",33,22,66.67,0.79,0.53
+"8","Trilaminar","cKO","P08","P08_cKO","Other",18,11,61.11,0.98,0.6
+"9","Ependymal","Control","P08","P08_Control","Other",59,36,61.02,1.37,0.83
+"10","Ex_CA1","Control","P08","P08_Control","Excitatory Neuron",141,86,60.99,0.78,0.47
+"11","Ex_CA1","cKO","P00","P00_cKO","Excitatory Neuron",32,19,59.38,0.82,0.49
+"12","Granule_DG","Control","P08","P08_Control","Excitatory Neuron",118,70,59.32,0.85,0.5
+"13","Ependymal","Control","P56","P56_Control","Other",46,27,58.7,1.6,0.94
+"14","Trilaminar","Control","P23","P23_Control","Other",12,7,58.33,0.71,0.42
+"15","Ex_CA1","Control","P56","P56_Control","Excitatory Neuron",684,394,57.6,0.81,0.46
+"16","Ex_CA1","cKO","P08","P08_cKO","Excitatory Neuron",305,173,56.72,0.82,0.46
+"17","Ex_Cortex","Control","P08","P08_Control","Excitatory Neuron",565,320,56.64,0.88,0.5
+"18","NFOL","Control","P56","P56_Control","Oligodendrocytes",18,10,55.56,1.19,0.66
+"19","Ex_CA3","Control","P08","P08_Control","Excitatory Neuron",2832,1569,55.4,0.89,0.49
+"20","Ex_CA1","Control","P23","P23_Control","Excitatory Neuron",1012,555,54.84,0.8,0.44
+"21","Ex_Cortex","cKO","P08","P08_cKO","Excitatory Neuron",3609,1930,53.48,0.91,0.49
+"22","Ex_CA1","cKO","P56","P56_cKO","Excitatory Neuron",919,490,53.32,0.84,0.45
+"23","Ex_CA3","cKO","P08","P08_cKO","Excitatory Neuron",9609,5116,53.24,0.91,0.48
+"24","Ex_CA1","cKO","P23","P23_cKO","Excitatory Neuron",907,482,53.14,0.78,0.42
+"25","COP","cKO","P56","P56_cKO","Oligodendrocytes",31,16,51.61,1.32,0.68
+"26","Trilaminar","cKO","P23","P23_cKO","Other",20,10,50,0.78,0.39
+"27","Ex_Cortex","Control","P56","P56_Control","Excitatory Neuron",4262,2044,47.96,0.86,0.41
+"28","Granule_DG","cKO","P08","P08_cKO","Excitatory Neuron",556,259,46.58,0.94,0.44
+"29","Ex_CA3","Control","P00","P00_Control","Excitatory Neuron",1119,518,46.29,0.98,0.45
+"30","NFOL","cKO","P08","P08_cKO","Oligodendrocytes",13,6,46.15,0.9,0.41
+"31","Ex_CA3","cKO","P00","P00_cKO","Excitatory Neuron",1373,633,46.1,0.9,0.41
+"32","Ependymal","Control","P23","P23_Control","Other",88,40,45.45,1.68,0.76
+"33","Ex_Cortex","cKO","P23","P23_cKO","Excitatory Neuron",4597,2087,45.4,0.84,0.38
+"34","Ex_Cortex","Control","P23","P23_Control","Excitatory Neuron",4577,2025,44.24,0.87,0.39
+"35","Cajal_Retzius","Control","P08","P08_Control","Other",222,98,44.14,0.96,0.42
+"36","NFOL","Control","P23","P23_Control","Oligodendrocytes",78,34,43.59,1.13,0.49
+"37","CGE","Control","P56","P56_Control","Inhibitory Neuron",90,39,43.33,1.03,0.44
+"38","Ex_Cortex","cKO","P56","P56_cKO","Excitatory Neuron",4622,1949,42.17,0.92,0.39
+"39","Ependymal","cKO","P23","P23_cKO","Other",164,69,42.07,1.63,0.69
+"40","NPC","Control","P56","P56_Control","Glial",31,13,41.94,1.36,0.57
+"41","Interneuron","Control","P56","P56_Control","Inhibitory Neuron",1074,449,41.81,0.95,0.4
+"42","Granule_DG","cKO","P56","P56_cKO","Excitatory Neuron",394,159,40.36,1.05,0.42
+"43","Interneuron","Control","P08","P08_Control","Inhibitory Neuron",606,239,39.44,0.99,0.39
+"44","Ex_CA3","Control","P56","P56_Control","Excitatory Neuron",650,256,39.38,0.97,0.38
+"45","Interneuron","cKO","P08","P08_cKO","Inhibitory Neuron",2047,804,39.28,1,0.39
+"46","Ex_CA3","Control","P23","P23_Control","Excitatory Neuron",845,331,39.17,0.92,0.36
+"47","Macrophages","cKO","P00","P00_cKO","Immune",23,9,39.13,1.27,0.5
+"48","NPC","cKO","P56","P56_cKO","Glial",49,19,38.78,1.68,0.65
+"49","MGE","Control","P56","P56_Control","Inhibitory Neuron",44,17,38.64,0.97,0.38
+"50","Vascular","cKO","P00","P00_cKO","Vascular",273,105,38.46,0.99,0.38
+"51","CGE","Control","P08","P08_Control","Inhibitory Neuron",131,50,38.17,1.09,0.42
+"52","CGE","Control","P23","P23_Control","Inhibitory Neuron",119,45,37.82,1,0.38
+"53","MGE","cKO","P23","P23_cKO","Inhibitory Neuron",56,21,37.5,0.97,0.36
+"54","Ex_CA3","cKO","P23","P23_cKO","Excitatory Neuron",660,244,36.97,0.96,0.35
+"55","Ex_CA3","cKO","P56","P56_cKO","Excitatory Neuron",897,330,36.79,0.96,0.35
+"56","Interneuron","cKO","P56","P56_cKO","Inhibitory Neuron",1034,378,36.56,1.01,0.37
+"57","Cajal_Retzius","cKO","P00","P00_cKO","Other",1756,637,36.28,0.84,0.3
+"58","CGE","cKO","P08","P08_cKO","Inhibitory Neuron",403,146,36.23,1.07,0.39
+"59","Interneuron","Control","P23","P23_Control","Inhibitory Neuron",848,306,36.08,0.95,0.34
+"60","Granule_DG","Control","P56","P56_Control","Excitatory Neuron",422,152,36.02,1.01,0.36
+"61","Interneuron","cKO","P23","P23_cKO","Inhibitory Neuron",1121,399,35.59,0.92,0.33
+"62","CGE","cKO","P56","P56_cKO","Inhibitory Neuron",130,46,35.38,1.09,0.39
+"63","RGL_DG","cKO","P08","P08_cKO","Glial",358,126,35.2,1.19,0.42
+"64","NPC","cKO","P23","P23_cKO","Glial",83,29,34.94,1.49,0.52
+"65","Cajal_Retzius","cKO","P08","P08_cKO","Other",1442,501,34.74,1.02,0.35
+"66","NFOL","cKO","P23","P23_cKO","Oligodendrocytes",58,20,34.48,1.24,0.43
+"67","Granule_Blast_DG","Control","P00","P00_Control","Excitatory Neuron",2960,1019,34.43,0.95,0.33
+"68","MFOL","Control","P23","P23_Control","Oligodendrocytes",465,160,34.41,1.3,0.45
+"69","Granule_DG","cKO","P23","P23_cKO","Excitatory Neuron",581,196,33.73,1.01,0.34
+"70","Vascular","cKO","P08","P08_cKO","Vascular",389,131,33.68,1.2,0.4
+"71","Trilaminar","Control","P08","P08_Control","Other",6,2,33.33,0.78,0.26
+"72","Granule_DG","Control","P23","P23_Control","Excitatory Neuron",657,215,32.72,1.04,0.34
+"73","Astrocytes","Control","P56","P56_Control","Glial",947,305,32.21,1.32,0.43
+"74","OPC","Control","P08","P08_Control","Oligodendrocytes",466,150,32.19,1.12,0.36
+"75","NPC","cKO","P00","P00_cKO","Glial",392,124,31.63,1.13,0.36
+"76","Vascular","Control","P00","P00_Control","Vascular",215,68,31.63,1.12,0.35
+"77","Ependymal","cKO","P56","P56_cKO","Other",32,10,31.25,1.64,0.51
+"78","Interneuron","cKO","P00","P00_cKO","Inhibitory Neuron",129,40,31.01,0.99,0.31
+"79","Astrocytes","cKO","P56","P56_cKO","Glial",924,280,30.3,1.39,0.42
+"80","Vascular","Control","P08","P08_Control","Vascular",186,56,30.11,1.13,0.34
+"81","Astrocytes","Control","P08","P08_Control","Glial",442,133,30.09,1.31,0.39
+"82","Trilaminar","cKO","P56","P56_cKO","Other",10,3,30,1.12,0.33
+"83","OPC","Control","P56","P56_Control","Oligodendrocytes",234,70,29.91,1.15,0.34
+"84","COP","Control","P23","P23_Control","Oligodendrocytes",114,34,29.82,1.16,0.35
+"85","OPC","cKO","P08","P08_cKO","Oligodendrocytes",1830,544,29.73,1.11,0.33
+"86","Astrocytes","cKO","P08","P08_cKO","Glial",2110,626,29.67,1.32,0.39
+"87","COP","Control","P56","P56_Control","Oligodendrocytes",34,10,29.41,0.87,0.26
+"88","MFOL","Control","P56","P56_Control","Oligodendrocytes",51,15,29.41,1.17,0.34
+"89","OPC","cKO","P00","P00_cKO","Oligodendrocytes",172,50,29.07,0.97,0.28
+"90","MFOL","cKO","P56","P56_cKO","Oligodendrocytes",62,18,29.03,1.35,0.39
+"91","CGE","cKO","P23","P23_cKO","Inhibitory Neuron",104,30,28.85,1,0.29
+"92","Trilaminar","Control","P56","P56_Control","Other",7,2,28.57,1.1,0.31
+"93","Cajal_Retzius","cKO","P23","P23_cKO","Other",155,44,28.39,1.1,0.31
+"94","MGE","Control","P23","P23_Control","Inhibitory Neuron",46,13,28.26,0.95,0.27
+"95","Granule_Blast_DG","cKO","P00","P00_cKO","Excitatory Neuron",2190,617,28.17,0.98,0.28
+"96","RGL_DG","Control","P56","P56_Control","Glial",18,5,27.78,1.1,0.31
+"97","Cajal_Retzius","Control","P23","P23_Control","Other",76,21,27.63,1.05,0.29
+"98","NPC","Control","P08","P08_Control","Glial",76,21,27.63,1.32,0.37
+"99","COP","Control","P08","P08_Control","Oligodendrocytes",40,11,27.5,1.38,0.38
+"100","NPC","Control","P00","P00_Control","Glial",695,191,27.48,1.26,0.35
+"101","COP","cKO","P08","P08_cKO","Oligodendrocytes",168,46,27.38,1.15,0.31
+"102","RGL_DG","Control","P23","P23_Control","Glial",33,9,27.27,1.01,0.28
+"103","RGL_DG","cKO","P56","P56_cKO","Glial",33,9,27.27,1.6,0.44
+"104","Astrocytes","Control","P23","P23_Control","Glial",738,201,27.24,1.24,0.34
+"105","NPC","Control","P23","P23_Control","Glial",48,13,27.08,1.42,0.39
+"106","RGL_DG","cKO","P00","P00_cKO","Glial",190,51,26.84,1.1,0.29
+"107","OPC","cKO","P23","P23_cKO","Oligodendrocytes",374,100,26.74,1.22,0.33
+"108","NFOL","cKO","P56","P56_cKO","Oligodendrocytes",15,4,26.67,1.05,0.28
+"109","Cajal_Retzius","Control","P56","P56_Control","Other",53,14,26.42,1.08,0.28
+"110","RGL_DG","Control","P08","P08_Control","Glial",106,28,26.42,1.4,0.37
+"111","OPC","Control","P23","P23_Control","Oligodendrocytes",311,82,26.37,1.17,0.31
+"112","Pericytes","cKO","P00","P00_cKO","Vascular",69,18,26.09,0.96,0.25
+"113","CGE","Control","P00","P00_Control","Inhibitory Neuron",39,10,25.64,1.26,0.32
+"114","Pericytes","Control","P00","P00_Control","Vascular",82,21,25.61,1.19,0.3
+"115","Cajal_Retzius","Control","P00","P00_Control","Other",954,244,25.58,1.11,0.29
+"116","Astrocytes","Control","P00","P00_Control","Glial",237,60,25.32,1.3,0.33
+"117","OPC","cKO","P56","P56_cKO","Oligodendrocytes",218,55,25.23,1.2,0.3
+"118","Astrocytes","cKO","P00","P00_cKO","Glial",244,61,25,1.14,0.29
+"119","Astrocytes","cKO","P23","P23_cKO","Glial",1071,267,24.93,1.34,0.33
+"120","CGE","cKO","P00","P00_cKO","Inhibitory Neuron",53,13,24.53,1.11,0.27
+"121","MGE","cKO","P56","P56_cKO","Inhibitory Neuron",53,13,24.53,1.02,0.25
+"122","NPC","cKO","P08","P08_cKO","Glial",605,146,24.13,1.4,0.34
+"123","MFOL","cKO","P23","P23_cKO","Oligodendrocytes",333,80,24.02,1.23,0.3
+"124","Cajal_Retzius","cKO","P56","P56_cKO","Other",217,52,23.96,1.22,0.29
+"125","Macrophages","Control","P00","P00_Control","Immune",13,3,23.08,1.29,0.3
+"126","Granule_Blast_DG","Control","P08","P08_Control","Excitatory Neuron",145,33,22.76,1.47,0.34
+"127","RGL_DG","Control","P00","P00_Control","Glial",225,50,22.22,1.45,0.32
+"128","OPC","Control","P00","P00_Control","Oligodendrocytes",197,43,21.83,1.17,0.26
+"129","Microglia","Control","P00","P00_Control","Glial",29,6,20.69,1.13,0.23
+"130","Pericytes","Control","P56","P56_Control","Vascular",88,18,20.45,1.36,0.28
+"131","Mature_OL","Control","P23","P23_Control","Oligodendrocytes",157,32,20.38,1.43,0.29
+"132","Vascular","cKO","P56","P56_cKO","Vascular",108,22,20.37,1.3,0.27
+"133","Ex_Cortex","Control","P00","P00_Control","Excitatory Neuron",5,1,20,1.26,0.25
+"134","Granule_DG","Control","P00","P00_Control","Excitatory Neuron",15,3,20,1.56,0.31
+"135","Microglia","cKO","P00","P00_cKO","Glial",15,3,20,1.19,0.24
+"136","Pericytes","Control","P08","P08_Control","Vascular",45,9,20,1.33,0.27
+"137","Pericytes","cKO","P08","P08_cKO","Vascular",121,24,19.83,1.02,0.2
+"138","Mature_OL","cKO","P23","P23_cKO","Oligodendrocytes",154,30,19.48,1.47,0.29
+"139","Vascular","Control","P56","P56_Control","Vascular",141,26,18.44,1.65,0.3
+"140","Mature_OL","Control","P56","P56_Control","Oligodendrocytes",489,89,18.2,1.72,0.31
+"141","Granule_Blast_DG","cKO","P08","P08_cKO","Excitatory Neuron",912,157,17.21,1.49,0.26
+"142","Granule_DG","cKO","P00","P00_cKO","Excitatory Neuron",47,8,17.02,1.69,0.29
+"143","Macrophages","cKO","P56","P56_cKO","Immune",6,1,16.67,0.89,0.15
+"144","Interneuron","Control","P00","P00_Control","Inhibitory Neuron",91,15,16.48,1.1,0.18
+"145","COP","cKO","P23","P23_cKO","Oligodendrocytes",116,19,16.38,1.01,0.17
+"146","Macrophages","cKO","P08","P08_cKO","Immune",70,11,15.71,1.05,0.17
+"147","Pericytes","Control","P23","P23_Control","Vascular",78,12,15.38,1.14,0.18
+"148","Vascular","cKO","P23","P23_cKO","Vascular",124,19,15.32,1.51,0.23
+"149","Pericytes","cKO","P23","P23_cKO","Vascular",79,12,15.19,1.48,0.22
+"150","Pericytes","cKO","P56","P56_cKO","Vascular",64,9,14.06,1.1,0.16
+"151","Mature_OL","cKO","P56","P56_cKO","Oligodendrocytes",398,55,13.82,1.88,0.26
+"152","Granule_Blast_DG","cKO","P23","P23_cKO","Excitatory Neuron",51,7,13.73,1.33,0.18
+"153","Vascular","Control","P23","P23_Control","Vascular",103,14,13.59,1.14,0.15
+"154","Microglia","Control","P08","P08_Control","Glial",67,9,13.43,1.57,0.21
+"155","RGL_DG","cKO","P23","P23_cKO","Glial",55,7,12.73,1.44,0.18
+"156","Microglia","Control","P56","P56_Control","Glial",111,13,11.71,1.97,0.23
+"157","Granule_Blast_DG","Control","P23","P23_Control","Excitatory Neuron",69,8,11.59,1.46,0.17
+"158","Microglia","cKO","P08","P08_cKO","Glial",304,35,11.51,1.64,0.19
+"159","Microglia","cKO","P23","P23_cKO","Glial",240,27,11.25,1.85,0.21
+"160","Microglia","Control","P23","P23_Control","Glial",177,15,8.47,1.81,0.15
+"161","Granule_Blast_DG","cKO","P56","P56_cKO","Excitatory Neuron",13,1,7.69,1.77,0.14
+"162","Microglia","cKO","P56","P56_cKO","Glial",130,9,6.92,1.64,0.11
+"163","Macrophages","Control","P08","P08_Control","Immune",21,1,4.76,0.87,0.04
+"164","Granule_Blast_DG","Control","P56","P56_Control","Excitatory Neuron",8,0,0,NA,0
+"165","MGE","cKO","P08","P08_cKO","Inhibitory Neuron",5,0,0,NA,0
+"166","Macrophages","Control","P23","P23_Control","Immune",5,0,0,NA,0
+"167","Macrophages","Control","P56","P56_Control","Immune",2,0,0,NA,0
+"168","Macrophages","cKO","P23","P23_cKO","Immune",7,0,0,NA,0
+"169","Trilaminar","Control","P00","P00_Control","Other",1,0,0,NA,0

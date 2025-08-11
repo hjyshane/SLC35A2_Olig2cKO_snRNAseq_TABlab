@@ -1,0 +1,2 @@
+"","p_val","avg_log2FC","pct.1","pct.2","p_val_adj","gene","cell_type","TimePoint","Regulation"
+"Ttr",1.12931008232181e-06,-2.29386012336144,0.226,0.529,0.0195765902770485,"Ttr","OPC","P00","Down"

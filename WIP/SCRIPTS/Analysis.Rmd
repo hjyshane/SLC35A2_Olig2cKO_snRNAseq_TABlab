@@ -1,0 +1,910 @@
+---
+title: "SLC35A2 Olig2 cKO snRNAseq analysis"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+# Project set up
+
+## Random Seed
+```{r Setting seed, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}}
+set.seed(0827)
+```
+## Library load
+```{r Library loading, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+#### Library load ####
+# Analysis
+library(future)
+library(Seurat)
+library(glmGamPoi)
+library(SeuratExtend)
+library(clusterProfiler)
+library(rrvgo)
+library(SoupX)
+library(miloR)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+
+# Stat test
+library(presto)
+library(speckle)
+library(scProportionTest)
+
+# Reference
+library(org.Mm.eg.db)
+library(BSgenome.Mmusculus.UCSC.mm10)
+
+# File load and save
+library(qs)
+
+# Load HDF5 library from IGM
+# dyn.load("/igm/apps/hdf5/hdf5-1.12.1/lib/libhdf5_hl.so.200")  
+library(hdf5r)
+
+# Data manipulation
+library(tidyverse)
+
+# Visualization
+library(ggplot2)
+library(ggstats)
+library(patchwork)
+library(EnhancedVolcano)
+library(enrichplot)
+library(ggtext)
+```
+
+```{r}
+options(Ncpus = parallel::detectCores()-1)
+future::plan(future::multisession, workers = parallel::detectCores() - 1)
+data.table::setDTthreads(parallel::detectCores()-1)
+```
+
+## Source Code list
+```{r Source Code list, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Load custom function scripts
+source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/01__load_rna_from_h5.R")
+source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/02__create_seurat_object.R")
+source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/03__rna_qc.R")
+source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/04__process_rna.R')
+source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration.R')
+source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/06__process_integrated.R')
+source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07__clustering.R')
+source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/08__ref_mousebrain_annotation.R')
+```
+
+## Folder directory
+```{r Directories, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Directory setup
+h5_input_dir <- 
+  '/igm/projects/250718_GSL-EM-4483'
+save_dir <- 
+  '~/SLC35A2_Olig2cKO_snRNA/WIP'
+qsave_dir <- 
+  file.path(save_dir, "QSAVE")
+qc_dir    <- 
+  file.path(save_dir, "QC")
+csv_dir <- 
+  file.path(save_dir, 'CSV')
+plot_dir <- 
+  file.path(save_dir, 'PLOTS')
+
+# Create folders if needed
+dir.create(save_dir, recursive = TRUE)
+dir.create(qsave_dir, recursive = TRUE)
+dir.create(qc_dir, recursive = TRUE)
+dir.create(csv_dir, recursive = TRUE)
+dir.create(plot_dir, recursive = TRUE)
+```
+
+## Sample list set
+```{r Sample list setup, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Set sample list name = index, item = samples
+samples_named <- 
+  list(
+    "FF061" = c("SOM333", "SOM318", "SOM303", "SOM301"),
+    "FF062" = c("SOM326", "SOM325", "SOM323", "SOM322"),
+    "FF063" = c("SOM329", "SOM328", "SOM327", "SOM302"),
+    "FF064" = c("SOM378", "SOM377", "SOM376", "P07"))
+
+# Set sample list without names
+samples <- 
+  names(seurat_list)
+
+# Sample Info
+info <- list(
+  "SOM301" = c("P23", "cKO"),
+  "SOM303" = c("P23", "cKO"),
+  "SOM318" = c("P08", "cKO"),
+  "SOM333" = c("P23", "Control"),
+  "SOM322" = c("P56", "Control"),
+  "SOM323" = c("P56", "Control"),
+  "SOM325" = c("P56", "cKO"),
+  "SOM326" = c("P56", "cKO"),
+  "SOM302" = c("P23", "Control"),
+  "SOM327" = c("P08", "Control"),
+  "SOM328" = c("P08", "Control"),
+  "SOM329" = c("P08", "cKO"),
+  "SOM376" = c("P00", "cKO"),
+  "SOM377" = c("P00", "Control"),
+  "SOM378" = c("P00", "Control"),
+  "P07" = c("P00", "cKO")
+)
+```
+
+# Initial processing
+
+## Load data files
+```{r [O] Load RNA data from H5 files, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/01__load_rna_from_h5.R")
+rna_list <- 
+  load_rna_from_h5(h5_input_dir,
+                   samples_named,
+                   save = T,
+                   save_dir = qsave_dir)
+
+# Save
+qs::qsave(rna_list, 
+          file = "~/SLC35A2_Olig2cKO_snRNA/WIP/QSAVE/01_rna_list.qs")
+
+```
+
+## Seurat Object creation
+```{r [O] Create Seurat Object from RNA data, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/02__create_oligsub_man2ect.R")
+
+# load previous object if needed
+# rna_list <- qs::qread("~/SLC35A2_Olig2cKO_snRNA/WIP/QSAVE/01_rna_list.qs")
+
+seurat_list <- 
+  create_oligsub_man2ect(rna_list,
+                       h5_input_dir, # for meta data file path
+                       samples_named,
+                       project = 'SLC35A2Olig',
+                       min.cell = 3,
+                       min.feature = 200,
+                       save = T,
+                       save_dir = qsave_dir)
+
+# Raw count matrices loaded
+# Seurat objects created with  metadata
+# Sample/index identifiers added
+# Mitochondrial gene percentages calculated
+
+# Save
+qs::qsave(seurat_list, 
+          file = file.path(qsave_dir, "02_rna_list_seurat.qs"))
+```
+
+## Initial Vizualization
+```{r [V] Initial Visual Overview , echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# R script located at "~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/02_Initial_VlnPlot.R"
+plots <- qc_VlnPlot(seurat_list, save_dir = plot_dir)
+```
+
+## Basic metrics
+```{r [S] Initial process - Stats Table, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# From the literature
+# Cell-Level Filtering:
+## UMI counts: 1000 < UMI < 25,000
+## Gene features: > 400 genes (some use > 200)
+## Mitochondrial %: < 15%
+# Gene-Level Filtering:
+## Min cells expressing: ≥ 3 cells
+## Remove mitochondrial genes for downstream analysis
+
+# Create table with counts information
+SummaryTable <- data.frame()
+
+for (sample in seurat_list) {
+  dt <- data.frame(
+    # Sample name
+    MouseID = unique(sample$MouseID),
+    
+    TotalCells = nrow(sample@meta.data),
+    
+    nCount_mean = mean(sample$nCount_RNA),
+    nFeature_RNA_mean = mean(sample$nFeature_RNA),
+    percent_mt_rna_mean = mean(sample$percent_mt_rna),
+    
+    nCount_median = median(sample$nCount_RNA),
+    nFeature_RNA_median = median(sample$nFeature_RNA),
+    percent_mt_rna_median = median(sample$percent_mt_rna),
+    
+    nCount_min = min(sample$nCount_RNA),
+    nCount_max = max(sample$nCount_RNA),
+    
+    nFeature_RNA_min = min(sample$nFeature_RNA),
+    nFeature_RNA_max = max(sample$nFeature_RNA),
+    
+    percent_mt_rna_min = min(sample$percent_mt_rna),
+    percent_mt_rna_max = max(sample$percent_mt_rna)
+  )
+  
+  # Put all in one table
+  SummaryTable <- bind_rows(SummaryTable, dt)
+}
+
+write.csv(SummaryTable, file = file.path(csv_dir, "Initial_stats.csv"))
+
+#### Same table but using map_dfr  #### 
+SummaryTable <- map_dfr(names(seurat_list), ~{
+  meta <- seurat_list[[.x]]@meta.data
+  data.frame(
+    # Sample name
+    MouseID = unique(meta$MouseID),
+
+    TotalCells = nrow(meta),
+
+    nCount_mean = mean(meta$nCount_RNA),
+    nFeature_RNA_mean = mean(meta$nFeature_RNA),
+    percent_mt_rna_mean = mean(meta$percent_mt_rna),
+
+    nCount_median = median(meta$nCount_RNA),
+    nFeature_RNA_median = median(meta$nFeature_RNA),
+    percent_mt_rna_median = median(meta$percent_mt_rna),
+
+    nCount_min = min(meta$nCount_RNA),
+    nCount_max = max(meta$nCount_RNA),
+
+    nFeature_RNA_min = min(meta$nFeature_RNA),
+    nFeature_RNA_max = max(meta$nFeature_RNA),
+
+    percent_mt_rna_min = min(meta$percent_mt_rna),
+    percent_mt_rna_max = max(meta$percent_mt_rna))
+})
+
+```
+
+## QC metric exprlore
+```{r [S] Initial process - QC threshold test, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/03_qc_threshold_test.R')
+QC_test <- qc_threshold(seurat_list = seurat_list,
+                         min_count = 1000,
+                         max_count = 25000,
+                         min_feature = 400,
+                         max_mt = 5)
+```
+
+# Filtering and Processing
+## Filter based on QC matrics
+```{r [O] Initial process - Filter, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/03__rna_qc.R")
+
+# load previous object if needed
+# seurat_list <- qs::qread("~/SLC35A2_Olig2cKO_snRNA/WIP/QSAVE/02_rna_list_seurat.qs")
+
+# Filter the cells
+filtered_list <- rna_qc(
+  seurat_list,
+  samples,
+  nCount_RNA_low = 1000,
+  nCount_RNA_high = 25000,
+  nFeature_RNA_low = 400,
+  mt_rna = 5,
+  save = T,
+  save_dir_qs = qsave_dir,
+  save_dir_qc = qc_dir)
+
+# Check filtered cell counts
+QC_summary <- read_csv("WIP/QC/QC_summary.csv")
+
+# Save
+qs::qsave(filtered_list, 
+          file = file.path(qsave_dir, "03_filtered_rna_list.qs"))
+
+```
+
+## Pre-processing
+```{r [O] Normalization and preprocessing, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/04__process_rna.R")
+
+# Read previous object if needed.
+# filtered_list <- qs::qread(file.path(qsave_dir, "03_filtered_rna_list.qs"))
+
+# Normalization, SCTrancform, PCA and UMAP/TSNE
+processed_list <- process_rna(
+  filtered_list,
+  save = TRUE,
+  save_dir = qsave_dir)
+
+# Save
+qs::qsave(processed_list, 
+          file = file.path(qsave_dir, '04_processed_rna_list.qs'))
+```
+
+# Integration
+```{r [O] Integrate RNA objects, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/05__rna_integration.R')
+
+# Read previous object if needed.
+# processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list.qs"))
+
+# Integration
+integrated_rna <- rna_integration(
+  processed_list,
+  save = T,
+  save_dir = qsave_dir)
+```
+Integration with SCT method -> failed due to limit of data size can handeled by Seurat
+
+## Integration with RPCA method
+Integration with SCT can't cover the number of cells in our object so trying RPCA method in next section
+```{r [O] Integrate RNA objects with RPCA, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration.R')
+
+# Read previous object if needed.
+# processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list.qs"))
+
+# Integration
+integrated <- rpca_integration(processed_list, 
+                               save = TRUE,
+                               save_dir = qsave_dir)
+
+```
+
+# Process Integrated object
+## PCA, Dimentional Reduction
+```{r [O] Process integrated object, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/06__process_integrated.R')
+
+# Read previous object if needed.
+# integrated <- qs::qread(file.path(qsave_dir, "05_integrated_rna.qs"))
+
+# Process integrated object
+integrated <- process_integrated(integrated,
+                                 save = TRUE,
+                                 qsave_dir = qsave_dir)
+
+```
+
+### Initial visualization - DimPlot
+```{r [V] Initial DimPlot after integration, message=TRUE, warning=TRUE, paged.print=TRUE}
+# set assay and Idents
+Seurat::DefaultAssay(integrated) <- "RNA"
+Seurat::Idents(integrated) <- "MouseID"
+
+# DimPLot
+dp <- Seurat::DimPlot(integrated, reduction = 'umap', group.by = 'Timepoint', alpha = 0.3) |
+  Seurat::DimPlot(integrated, reduction = 'umap', group.by = 'Genotype', alpha = 0.3) |
+  Seurat::DimPlot(integrated, reduction = 'umap', group.by = "MouseID", alpha = 0.3) |
+  Seurat::DimPlot(integrated, reduction = 'umap', group.by = "SampleID", alpha = 0.3)
+
+# Save
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_initial_all.png"), dp, width = 18, height = 4, dpi = 300)
+
+Seurat::DimPlot(integrated, reduction = 'umap', split.by = 'Timepoint', alpha = 0.3)
+Seurat::DimPlot(integrated, reduction = 'umap', split.by = 'Genotype', alpha = 0.3)
+Seurat::DimPlot(integrated, reduction = 'umap', split.by = "MouseID", alpha = 0.3)
+Seurat::DimPlot(integrated, reduction = 'umap', split.by = "SampleID", alpha = 0.3)
+```
+
+## Cluster and Markers, additional meta data
+```{r [O] Clusteriazation, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07__clustering.R')
+
+# Read previous object if needed.
+# integrated <- qs::qread(file.path(qsave_dir, "06_integrated_rna.qs"))
+
+integrated <- clustering(integrated,
+                         range_start = 0.4,
+                         range_end = 1.2,
+                         range_step = 0.1,
+                         save = TRUE,
+                         qsave_dir = qsave_dir,
+                         markers_dir = file.path(csv_dir, "Markers"))
+
+
+# Additional meta data
+# Forgot to add this early in the process so adding now.
+# Convert info list to lookup vectors
+timepoint_lookup <- sapply(info, function(x) x[1])
+genotype_lookup <- sapply(info, function(x) x[2])
+
+# Add to metadata
+integrated@meta.data <- integrated@meta.data %>%
+  mutate(
+    Timepoint = timepoint_lookup[MouseID],
+    Genotype = genotype_lookup[MouseID]
+  )
+
+# Add additional meta data combine age and genotype
+integrated@meta.data$TimeGeno <- paste0(integrated@meta.data$Timepoint, "_", integrated@meta.data$Genotype)
+
+# Fix 
+integrated$TimePoint <- integrated$Timepoint
+integrated$GenoType <- integrated$Genotype
+integrated$Timepoint <- NULL
+integrated$Genotype <- NULL
+
+# Join layers after integration in RNA assay
+Seurat::DefaultAssay(integrated) <- "RNA"
+integrated <- Seurat::JoinLayers(integrated)
+
+# Save
+qs::qsave(integrated, file = file.path(qsave_dir, "08_clustered_metadata_added.qs"))
+```
+
+## Use Mousebrain.org object as reference for cell typing. Using Jesse's custom object.
+```{r [O] Cell type, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/13_ref_mousebrain_annotation.R')
+
+# Read previous object if needed.
+# integrated <- qs::qread(file.path(qsave_dir, "08_clustered_metadata_added.qs"))
+
+# Read reference object for cell typing
+ref_obj <- Seurat::readRDS("~/SLC35A2_Olig2cKO_snRNA/WIP/mouseatlas_cut_processed.rds")
+
+Seurat::DefaultAssay(integrated) <- "SCT"
+Seurat::DefaultAssay(ref_obj) <- "SCT"
+
+# run mouse annotation
+integrated <- ref_mousebrain_annotation(ref_obj,
+                                        integrated,
+                                        save = T,
+                                        save_dir = qsave_dir)
+
+# Also, cleaned out metadat. all prediction score were deleted.
+```
+
+```{r [O] Clean ref annotation, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj.qs"))
+
+# Ref cell type prediction will be stored in oligsub_man2$predicted.id.
+Seurat::Idents(integrated) <- integrated$predicted.id
+
+# Visualize
+Seurat::DimPlot(integrated, reduction = "umap", label = T, repel = T) + NoLegend()
+
+# get names and shorten them
+ln <- unique(integrated$predicted.id)
+
+sn <- c("Ex_Cortex", "Microglia", "Ex_CA3", "NPC", "Ex_CA1", "Interneuron", "Astrocytes", "Granule_DG", "Microglia",
+        "MFOL", "Vascular", "Interneuron", "COP", "Interneuron", "Interneuron", "CGE", "Ependymal", "CGE",
+        "Mature_OL", "OPC", "Cajal_Retzius", "Interneuron", "Pericytes", "Interneuron", "RGL_DG", "Astrocytes", "Granule_Blast_DG",
+        "Macrophages", "Vascular","MGE", "NFOL", "Trilaminar", "Vascular", "Vascular", "Interneuron", "Vascular", "Interneuron")
+
+# Mapping sn-ln
+name_map <- setNames(sn, ln)
+
+# Function to replace long names to short names
+shortened <- function(name) {ifelse(name %in% names(name_map), name_map[name], name)}
+
+# Apply function
+integrated$ref_short <- shortened(integrated$predicted.id)
+
+# Check UMAP
+Seurat::Idents(integrated) <- "ref_short"
+dp_ref <- Seurat::DimPlot(integrated, reduction = "umap", label = T, repel = T) + Seurat::NoLegend()
+
+# Save
+ggplot2::ggsave(dp_ref, file = file.path(plot_dir, "DimPlot_mousebrain_ref.png"), width = 8, height = 8, dpi = 300)
+qs::qsave(integrated, file = file.path(qsave_dir, "09_ref_annotated_obj.qs"))
+```
+
+## Milo try
+```{r [O] Milo for identifying cluster between cKO vs Control, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+## ~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/99_Milo.R
+# https://www.nature.com/articles/s41587-021-01033-z
+```
+
+## Gene list
+```{r [S] Gene list, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# "~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/99_gene_list.R"
+```
+
+## Manual Cell type check
+```{r [V] Cell type check with marker genes, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# "~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/99_CellTypeWork.R"
+Seurat::Idents(integrated) <- "CellTypes" 
+Seurat::DimPlot(integrated, reduction = "umap", label = TRUE, repel = TRUE) + Seurat::NoLegend()
+```
+
+## SLC35A2 exrpression check
+```{r [V] Check SLC35A2 expression, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Assay and idents set
+Seurat::DefaultAssay(integrated) <- "SCT"
+Seurat::Idents(integrated) <- "ref_short"
+
+# Visualize
+SeuratExtend::VlnPlot2(oligsub, features = "Slc35a2",show.mean = F, pt = F, box = F)
+Seurat::FeaturePlot(integrated, features = "Slc35a2", label = F, repel = T, split.by = "TimeGeno")
+
+# Save for refrence
+ggplot2::ggsave(slc35a2, file = file.path(plot_dir, "Feature_slc35a2.png"), width = 32, height = 8, dpi = 300)
+
+# Looking only Olig cells
+oligsub <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
+oligsub$ref_short <- factor(oligsub$ref_short, levels = c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
+
+# Assay and idents set
+Seurat::DefaultAssay(oligsub) <- "SCT"
+Seurat::Idents(oligsub) <- "MouseID"
+SeuratExtend::VlnPlot2(oligsub, features = "Slc35a2",show.mean = F, pt = F, box = F)
+# Slc35a2 expression doesn't seem to be reduced in cKO cells. it might be due to ambient RNA from dissociateion/library prep. Plan to implement SoupX (Tracy will provide the script to start). Then I can compare once again. 
+# SoupX didn't change much.
+## Nuclear RNA only, 
+```
+
+## Cell count check
+```{r [S] Cell count Summary, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+## "~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/99_CellCount_Slc35a2Check.R"
+# Done cell count summary, Slc35a2 expressing cell check
+# plot save in "./WIP/Plots/Cell_counts
+```
+
+## Visualize Cell tyep markers
+```{r [V]] DotPlot, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object
+# integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
+
+# Order Cell types
+integrated$CellTypes <- factor(integrated$CellTypes, levels = c('Astrocytes', 'Microglia', 'Ependymal', 'ExNeurons', 'InNeurons', 'NPC', 'OPC', 'NFOL', 'MFOL', 'Pericytes'))
+
+# Set marker genes to plot
+markers <- c('Aqp4', 'Aldh1l1', 'Gfap', 'P2ry12', 'Aif1', 'Tmem212', 'Foxj1', 'Satb2',  'Gad1','Cux1', 'Sst', 'Ndnf', 'Nes', 'Pdgfra', 'Cspg4', 'Enpp6', 'Plp1', 'Mog', 'Vtn', 'Pdgfrb')
+
+# Create DotPlot
+dp <- Seurat::DotPlot(integrated, 
+        features = markers, 
+        group.by = "CellTypes",
+        cols = c("darkgrey", "indianred1")) +
+  ggplot2::coord_flip() +
+  ggplot2::theme(
+        axis.text.x =
+            ggplot2::element_text(
+                angle = 90,
+                vjust = 0.8,
+                hjust = 1,
+                size = 10
+            ),
+        axis.text.y =
+            ggplot2::element_text(
+                size = 10
+            ),
+        axis.title.x =
+            ggplot2::element_blank(),
+        axis.title.y =
+            ggplot2::element_blank(),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8)
+    )
+
+# Additional DimPlot
+dimp <- SeuratExtend::DimPlot2(integrated, 
+                               reduction = 'umap', 
+                               group.by = 'CellTypes',
+                               label = TRUE,
+                               label.size = 5,
+                               repel = TRUE,
+                               theme = list(
+                                 Seurat::NoLegend(), 
+                                 Seurat::NoAxes(), 
+                                 ggtitle("UMAP by Cell Type")
+                                 )) +  
+  theme_umap_arrows(x_label = "UMAP_1",
+                    y_label = "UMAP_2") 
+
+# Save
+ggplot2::ggsave(dp, filename = file.path(plot_dir, "DotPlot_CellMarkers.png"), width = 7, height = 7, dpi = 300)
+ggplot2::ggsave(dimp, filename = file.path(plot_dir, "DimPlot_CellType.png"), width = 7, height = 7, dpi = 300)
+
+```
+
+# Work only with Olig population
+## Subset Olig only and re-process
+```{r [O] Subset, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object
+# integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
+
+# Subset based on manual
+oligsub_man <- subset(integrated, integrated$CellTypes %in% c("OPC", "NFOL", "MFOL"))
+
+# Subset based on manual
+oligsub_ref <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
+
+# Save
+qs::qsave(oligsub_man, file = file.path(qsave_dir, "11_OligOnlyInit_manual.qs"))
+qs::qsave(oligsub_ref, file = file.path(qsave_dir, "11_OligOnlyInit_refshort.qs"))
+```   
+```{r [O] Re-process, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object
+# oligsub_man <- qs::qread(file.path(qsave_dir, "11_OligOnlyInit_refshort.qs"))
+# oligsub_ref <- qs::qread(file.path(qsave_dir, "11_OligOnlyInit_manual.qs"))
+
+# Normalize/process 
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/06_process_oligsub.R')
+
+# Process integrated object
+oligsub_man <- process_oligsub(oligsub_man,
+                               save = TRUE,
+                               suffix = "_manual",
+                               qsave_dir = qsave_dir)
+
+oligsub_ref <- process_oligsub(oligsub_ref,
+                           save = TRUE,
+                           suffix = "_refshort",
+                           qsave_dir = qsave_dir)
+```
+
+## Initial visualization
+### Manual cluster
+```{r [V] DimPlot manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object
+# oligsub_man <- qs::qread(file.path(qsave_dir, "12_olig_processed_manual.qs"))
+
+# set assay and Idents
+Seurat::DefaultAssay(oligsub_man) <- "RNA"
+Seurat::Idents(oligsub_man) <- "MouseID"
+
+# DimPLot
+dp <- Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3) |
+  Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'GenoType', alpha = 0.3) |
+  Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = "MouseID", alpha = 0.3) |
+  Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = "SampleID", alpha = 0.3)
+
+dp_time <- Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3, split.by = "GenoType")
+
+dp_geno <- Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'GenoType', alpha = 0.3, split.by = "TimePoint")
+
+dp_tg <- Seurat::DimPlot(oligsub_man, reduction = 'umap', split.by = 'TimeGeno', alpha = 0.3)
+
+# Save
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_all_manual.png"), dp, width = 18, height = 4, dpi = 300)
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_timepoint_manual.png"), dp_time, width = 9, height = 4, dpi = 300)
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_genotype_manual.png"), dp_geno, width = 9, height = 4, dpi = 300)
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_TimeGeno_manual.png"), dp_tg, width = 18, height = 4, dpi = 300)
+```
+
+### ref_short cluster
+```{r [V] DimPlot refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object
+# oligsub_ref <- qs::qread(file.path(qsave_dir, "12_olig_processed_refshort.qs"))
+
+# set assay and Idents
+Seurat::DefaultAssay(oligsub_ref) <- "RNA"
+Seurat::Idents(oligsub_ref) <- "MouseID"
+
+# DimPLot
+dp <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3) |
+  Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'GenoType', alpha = 0.3) |
+  Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = "MouseID", alpha = 0.3) |
+  Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = "SampleID", alpha = 0.3)
+
+dp_time <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3, split.by = "GenoType")
+
+dp_geno <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'GenoType', alpha = 0.3, split.by = "TimePoint")
+
+dp_tg <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', split.by = 'TimeGeno', alpha = 0.3)
+
+# Save
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_all_refshort.png"), dp, width = 18, height = 4, dpi = 300)
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_timepoint_refshort.png"), dp_time, width = 9, height = 4, dpi = 300)
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_genotype_refshort.png"), dp_geno, width = 9, height = 4, dpi = 300)
+ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_TimeGeno_refshort.png"), dp_tg, width = 18, height = 4, dpi = 300)
+```
+
+## Clustering oligsub
+```{r [O] Clustering, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07_clustering_oligsub.R')
+
+# Read previous object if needed.
+# oligsub_man <- qs::qread(file.path(qsave_dir, "12_olig_processed_manual.qs"))
+# oligsub_ref <- qs::qread(file.path(qsave_dir, "12_olig_processed_refshort.qs"))
+
+oligsub_man <- clustering_oligsub(oligsub_man,
+                         range_start = 0.1,
+                         range_end = 1.2,
+                         range_step = 0.1,
+                         save = TRUE,
+                         suffix = "_manual",
+                         qsave_dir = qsave_dir,
+                         markers_dir = file.path(csv_dir, "Markers"))
+
+oligsub_ref <- clustering_oligsub(oligsub_ref,
+                         range_start = 0.1,
+                         range_end = 1.2,
+                         range_step = 0.1,
+                         save = TRUE,
+                         suffix = "_refshort",
+                         qsave_dir = qsave_dir,
+                         markers_dir = file.path(csv_dir, "Markers"))
+
+```
+
+### Manual clustering
+```{r [V] Check clusters - manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# oligsub_man <- qs::qread(file.path(qsave_dir, "13_clustered_oligsub_manual.qs"))
+
+# Olig markers
+olig_markers <- c(
+  'Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
+  'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
+  'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
+  'Cnp',
+  'Plp1', 'Mbp', 'Mag', 'Enpp4',
+  'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
+  "Tbx18", 'Vtn', 'Lum', 'Col1a2'
+  )
+
+# Set assay and Idents
+Seurat::DefaultAssay(oligsub_man) <- 'RNA'
+Seurat::Idents(oligsub_man) <- oligsub_man$Olig_cluster_0.3
+
+# Glimpse 
+Seurat::DimPlot(oligsub_man, reduction = "umap")
+
+
+# Feature plots
+fp_olig <- Seurat::FeaturePlot(oligsub_man, features = olig_markers, label = T)
+
+# Save
+ggplot2::ggsave(fp_olig, file = file.path(plot_dir, "FeaturePlot_Olig_markers_manual.png"), width = 16, height= 28, dpi = 300)
+```
+
+### ref_short clustering
+```{r [V] Check clusters - refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# oligsub_ref <- qs::qread(file.path(qsave_dir, "13_clustered_oligsub_refshort.qs"))
+
+# Olig markers
+olig_markers <- c(
+  'Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
+  'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
+  'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
+  'Cnp',
+  'Plp1', 'Mbp', 'Mag', 'Enpp4',
+  'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
+  "Tbx18", 'Vtn', 'Lum', 'Col1a2')
+
+# Set assay and Idents
+DefaultAssay(oligsub_ref) <- 'RNA'
+Idents(oligsub_ref) <- oligsub_ref$Olig_cluster_0.3
+
+# Glimpse 
+Seurat::DimPlot(oligsub_ref, reduction = "umap")
+
+# Feature plots
+fp_olig <- Seurat::FeaturePlot(oligsub_ref, features = olig_markers, label = T)
+
+# Save
+ggplot2::ggsave(fp_olig, file = file.path(plot_dir, "FeaturePlot_Olig_markers_refshort.png"), width = 16, height= 28, dpi = 300)
+```
+
+```{r [V] Visualization from paper, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# https://www.sciencedirect.com/science/article/pii/S0959438817301150
+# https://www.sciencedirect.com/science/article/pii/S2213671124000778?via%3Dihub
+# https://www.sciencedirect.com/science/article/pii/S1534580718305586?via%3Dihub
+# https://pmc.ncbi.nlm.nih.gov/articles/PMC5221728/pdf/emss-70326.pdf
+# https://onlinelibrary.wiley.com/doi/10.1111/epi.18413
+# https://pmc.ncbi.nlm.nih.gov/articles/PMC4691794/
+
+# Set assay and Idents
+Seurat::DefaultAssay(oligsub_man) <- "RNA"
+Seurat::DefaultAssay(oligsub_ref) <- "RNA"
+
+Seurat::Idents(oligsub_man) <- oligsub_man$Olig_cluster_0.3
+Seurat::Idents(oligsub_ref) <- oligsub_ref$Olig_cluster_0.3
+
+# Markers list
+markers <- list(
+   OligMarkers = c('Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
+                   'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
+                   'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
+                   'Cnp',
+                   'Plp1', 'Mbp', 'Mag', 'Enpp4',
+                   'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
+                   "Tbx18", 'Vtn', 'Lum', 'Col1a2'),
+  paper1 = c('Ascl1', 'Nfix', 'Dll3', 'Slc38a1', 'Rplp0', 'Rpl4', 'Eef2', 'Npas1', 'Hes', 'Epas1',
+             'Pnlip', 'Pcp4', 'Ptprn', 'Nrarp', 'Clu', 'Gcp5', 'Ttyh1'),
+  paper2 = c("Top2a", "Fyn", "Etv5", "Ednrb"),
+  paper3 = c("Adora1", "Brinp3", "Resp18", "Matn4", "Ccnb1", "Bche", "Cpm", "Elovl7", "Parvb", "Rspo2",
+             "Wnt8b", "Clic6", "Trpm3", "Pax2", "Arx", "Lhx6", "Col6a3", "Ddr2", "Abcc9", "Kcnj8",
+             "Gjb6", "Ranbp3l", "Itih2", "Il33"),
+  paper4 = c("Nr2e1", "Foxg1", "Neurod6", "Otx2", "Nkx2-1", "Eomes", "Hoxa13", "Hoxc11", "Hoxd9",
+             "Hoxa11", "Hoxc6", "Hoxb8", "Hoxa3", "Hoxb6", "Hoxc8", "Hoxc9", "Hoxc10", "Hoxa5", "Hoxa6",
+             "Hoxd10", "Hoxb2", "Hoxd11", "Hoxa9", "Hoxa7", "Hoxb7", "Hoxa10", "Hoxd9", "Hoxb9", "Pax8",
+             "Tlx3", "Nhlh2"),
+  paper5 = c("Gli1", "Ebf3", "Scrt2", "Mecom", "Lin28b", "Plag1", "Zic4", "Tcfap2b", "Osr1", "Tead2",
+             "Gli3", "Prdm6", "Bnc2", "Gli2", "Smad6", "Hoxb9", "Pax3", "Neurog2", "Lhx9", "Isl1",
+             "Neurod6", "Neurod1", "Neurod2", "Dlx1", "Satb2", "Sox8", "Nkx2-2", "Dbx2", "Barx2",
+             "Npas1", "Nkx6-2", "Cux1", "Cux2", "Bcl11b"),
+  IEGs = c("Jun", "Fos", "Egr1", "Junb")
+  )
+
+# FeaturePlot
+Seurat::FeaturePlot(oligsub_man, features = markers[['OligMarkers']])
+Seurat::FeaturePlot(oligsub_ref, features = markers[['OligMarkers']])
+
+Seurat::FeaturePlot(oligsub_man, features = markers[['paper1']])
+Seurat::FeaturePlot(oligsub_ref, features = markers[['paper1']])
+
+Seurat::FeaturePlot(oligsub_man, features = markers[['paper2']])
+Seurat::FeaturePlot(oligsub_ref, features = markers[['paper2']])
+
+Seurat::FeaturePlot(oligsub_man, features = markers[['paper3']])
+Seurat::FeaturePlot(oligsub_ref, features = markers[['paper3']])
+
+Seurat::FeaturePlot(oligsub_man, features = markers[['paper4']])
+Seurat::FeaturePlot(oligsub_ref, features = markers[['paper4']])
+
+Seurat::FeaturePlot(oligsub_man, features = markers[['paper5']])
+Seurat::FeaturePlot(oligsub_ref, features = markers[['paper5']])
+
+Seurat::FeaturePlot(oligsub_man, features = markers[['IEGs']])
+Seurat::FeaturePlot(oligsub_ref, features = markers[['IEGs']])
+```
+
+```{r [O] Name cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Set Idents
+Seurat::Idents(oligsub_man) <- oligsub_man$ref_short
+
+# Glimpse
+Seurat::DimPlot(oligsub_man, reduction = 'umap', label = T)
+
+# Map
+map <- c(
+  "0" = "OPC_1", "3" = "OPC_1",
+  "5" = "COP",
+  "9" = "NFOL",
+  "1" = "MFOL",
+  "6" = "Mature_OL", "4" = "Mature_OL",
+  "2" = "OPC_2", "7" = "OPC_2", "8" = "OPC_2","10" = "OPC_2"
+  )
+
+# Add to meta data
+oligsub_man@meta.data$OligSub <- map[as.character(oligsub_man$Olig_cluster_0.3)]
+
+# Set Idents
+Seurat::Idents(oligsub_man) <- oligsub_man$OligSub
+
+# Glimpse
+Seurat::DimPlot(oligsub_man, reduction = 'umap', label = T)
+
+# FeaturePlot
+SeuratExtend::FeaturePlot3.grid(oligsub_man, features = c('Pdgfra', 'Cspg4', 'Sox10', 'Enpp6', 'Mog', 'Plp1', 'Mag', 'Mbp', 'Opalin', 'Mobp', 'Serinc5', 'Apod'))
+
+Seurat::FeaturePlot(oligsub_man, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 'Mbp', 'Apod'), label = T)
+
+# Re-Subset based on manual
+oligsub_man2 <- subset(oligsub_man, oligsub_man$OligSub %in% c("OPC_1", "COP", "NFOL", "MFOL", "Mature_OL"))
+
+# Glimpse
+Seurat::DimPlot(oligsub_man2, reduction = 'umap', label = T, split.by = "TimeGeno", group.by = "OligSub")
+Seurat::FeaturePlot(oligsub_man2, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 'Mbp', 'Apod'), label = T)
+
+###############################################################
+# Set Idents
+Seurat::Idents(oligsub_ref) <- oligsub_ref$ref_short
+
+# Glimpse
+Seurat::DimPlot(oligsub_ref, reduction = 'umap', label = T)
+
+# FeaturePlot
+SeuratExtend::FeaturePlot3.grid(oligsub_ref, features = c('Pdgfra', 'Cspg4', 'Sox10', 'Enpp6', 'Mog', 'Plp1', 'Mag', 'Mbp', 'Opalin', 'Mobp', 'Serinc5', 'Apod'))
+
+Seurat::FeaturePlot(oligsub_ref, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 'Mbp', 'Apod'), label = T)
+
+
+```
+
+```{r [O] Doublet filter check, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Get individual RNA objects
+processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list.qs"))
+integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
+source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/04_doublet_process_rna.R")
+
+
+
+```
+
+```{r [O] Filter low number cell cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+
+```
+
+```{r [O] DEG, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+
+```
+

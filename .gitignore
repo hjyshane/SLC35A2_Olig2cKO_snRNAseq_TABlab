@@ -1,0 +1,56 @@
+# R session & project
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# Logs
+*.log
+
+# renv (keep lock, settings, activate; ignore libraries)
+renv/library*/
+renv/staging/
+renv/profiles/
+# (renv/activate.R, renv/settings.json, renv.lock are kept by default)
+
+# Raw / intermediate (adjust as needed)
+WIP/QSAVE/
+WIP/BASH_LOGS/
+#WIP/CSV/           # if these are outputs; comment out if you want CSV tracked
+#WIP/DEG/bg_csv/
+#WIP/DEG/sig_csv/
+WIP/QC/
+
+# Plots & heavy rendered outputs (path-based)
+WIP/PLOTS/
+WIP/DEG/Plots/
+
+# Temporary & cache
+cache/
+tmp/
+temp/
+*.tmp
+
+# Common large data formats (fallback)
+*.rds
+*.qs
+*.rda
+*.h5
+*.loom
+*.mtx
+
+# NGS-like data (just in case)
+*.fastq
+*.fastq.gz
+*.bam
+*.bai
+*.sam
+*.vcf
+*.vcf.gz
+*.bed
+*.bed.gz
+
+# System/editor
+.DS_Store
+Thumbs.db
