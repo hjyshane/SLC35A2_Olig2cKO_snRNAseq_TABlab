@@ -19,7 +19,11 @@ library(Seurat)
 library(glmGamPoi)
 library(SeuratExtend)
 library(clusterProfiler)
-library(rrvgo)
+library(DoubletFinder)
+library(parallel)
+library(future)
+
+# library(rrvgo)
 library(SoupX)
 library(miloR)
 library(SingleCellExperiment)
@@ -56,22 +60,21 @@ library(ggtext)
 
 ```{r}
 options(Ncpus = parallel::detectCores()-1)
-future::plan(future::multisession, workers = parallel::detectCores() - 1)
-data.table::setDTthreads(parallel::detectCores()-1)
+options(future.globals.maxSize = 16000 * 1024^2)
 ```
 
 ## Source Code list
 ```{r Source Code list, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Load custom function scripts
-source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/01__load_rna_from_h5.R")
-source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/02__create_seurat_object.R")
-source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/03__rna_qc.R")
-source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/04__process_rna.R')
-source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration.R')
-source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/06__process_integrated.R')
-source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07__clustering.R')
-source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/08__ref_mousebrain_annotation.R')
-```
+source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/01__load_rna_from_h5.R")
+source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/02__create_seurat_object.R")
+source("~/SLC35A2_Olig2cKO_snRNA_JY_JY/WIP/SCRIPTS/SourceCode/03__rna_qc.R")
+source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/04__process_rna.R')
+source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration.R')
+source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/06__process_integrated.R')
+source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07__clustering.R')
+source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/08__ref_mousebrain_annotation.R')
+```SLC35A2_Olig2cKO_snRNA_JY
 
 ## Folder directory
 ```{r Directories, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
@@ -79,7 +82,7 @@ source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/08__ref_mousebrain_annot
 h5_input_dir <- 
   '/igm/projects/250718_GSL-EM-4483'
 save_dir <- 
-  '~/SLC35A2_Olig2cKO_snRNA/WIP'
+  '~/SLC35A2_Olig2cKO_snRNA_JY/WIP'
 qsave_dir <- 
   file.path(save_dir, "QSAVE")
 qc_dir    <- 
@@ -894,10 +897,57 @@ Seurat::FeaturePlot(oligsub_ref, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 
 # Get individual RNA objects
 processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list.qs"))
 integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
-source("~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/04_doublet_process_rna.R")
 
+# Transfer cluster identity
+meta <- integrated@meta.data %>%
+  tibble::rownames_to_column("CellID") %>%
+  select(CellID, ref_short, CellTypes)
 
+for (i in seq_along(processed_list)) {
+  obj_meta <- processed_list[[i]]@meta.data %>%
+    tibble::rownames_to_column("CellID")
+  
+  new_meta <- obj_meta %>%
+    left_join(meta, by = "CellID")%>%
+    tibble::column_to_rownames("CellID")
+  
+  processed_list[[i]]@meta.data <- new_meta
+    
+}
 
+# save
+qs::qsave(processed_list, file = file.path(qsave_dir, "04_processed_rna_list_id.qs"))
+
+# Run doubletfinder
+source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_doublet_process_rna.R')
+processed_list <- find_dbl(processed_list)
+
+# save
+qs::qsave(processed_list, file = file.path(qsave_dir, "04_processed_rna_list_dbl.qs"))
+
+# Back transfer the metadata to integrated
+# Collect all metadata from processed_list
+all_individual_meta <- list()
+
+for (i in seq_along(processed_list)) {
+  individual_meta <- processed_list[[i]]@meta.data %>%
+    tibble::rownames_to_column("CellID") %>%
+    select(CellID, contains("DF.classifications"), contains("pANN")) # Select doublet-related columns
+    
+  all_individual_meta[[i]] <- individual_meta
+}
+
+# Combine all individual metadata
+combined_individual_meta <- do.call(rbind, all_individual_meta)
+
+# Transfer back to integrated object
+integrated_meta <- integrated@meta.data %>%
+  tibble::rownames_to_column("CellID") %>%
+  left_join(combined_individual_meta, by = "CellID") %>%
+  tibble::column_to_rownames("CellID")
+
+# Update integrated object metadata
+integrated@meta.data <- integrated_meta
 ```
 
 ```{r [O] Filter low number cell cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
