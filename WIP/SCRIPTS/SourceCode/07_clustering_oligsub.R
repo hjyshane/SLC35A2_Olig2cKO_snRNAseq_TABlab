@@ -1,5 +1,5 @@
 # read this function with
-# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07__clustering.R')
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07__clustering_oligsub.R')
 
 #' Process integrated Seurat object (PCA, clustering, markers, UMAP/TSNE)
 #'
@@ -42,7 +42,7 @@ clustering_oligsub <- function(
             integrated_rna,
             graph.name = 'snn',
             resolution = i,
-            cluster.name = paste0("Olig_cluster_", i))
+            cluster.name = paste0("Olig_cluster", suffix, "_", i))
     }
 
     # Find markers
@@ -53,7 +53,7 @@ clustering_oligsub <- function(
     # logfc.threshold: Minimum log fold-change required to call a feature significant.
     markers <- list()
     for (i in cluster_range) {
-        cluster <- paste0('Olig_cluster_', i)
+        cluster <- paste0('Olig_cluster', suffix, "_", i)
         Seurat::Idents(integrated_rna) <- integrated_rna[[cluster]][,1]
         markers[[cluster]] <- Seurat::FindAllMarkers(
             integrated_rna,
@@ -65,8 +65,8 @@ clustering_oligsub <- function(
     }
 
     # Save object
-    if (save) {qs::qsave(integrated_rna, file = file.path(qsave_dir, paste0("13_clustered_oligsub", suffix, ".qs")))
-        message('Saved processed integraed rna objec to ', file.path(qsave_dir, paste0("13_clustered_oligsub", suffix, ".qs")))
+    if (save) {qs::qsave(integrated_rna, file = file.path(qsave_dir, paste0("08_clustered", suffix, ".qs")))
+        message('Saved processed integraed rna objec to ', file.path(qsave_dir, paste0("08_clustered", suffix, ".qs")))
 
         for (name in names(markers)) {
             write.csv(markers[[name]], file = file.path(markers_dir, paste0(name, "_markers", suffix, ".csv")))

@@ -59,8 +59,8 @@ process_oligsub <- function(
 
   # Save object
   if (save) {
-    qs::qsave(integrated_rna, file = file.path(qsave_dir, paste0("12_olig_processed", suffix, ".qs")))
-    message('Saved processed integraed rna objec to ', file.path(qsave_dir, paste0("12_olig_processed", suffix, ".qs")))
+    qs::qsave(integrated_rna, file = file.path(qsave_dir, paste0("b2_olig_processed", suffix, ".qs")))
+    message('Saved processed integraed rna objec to ', file.path(qsave_dir, paste0("b2_olig_processed", suffix, ".qs")))
     }
   return(integrated_rna)
 }

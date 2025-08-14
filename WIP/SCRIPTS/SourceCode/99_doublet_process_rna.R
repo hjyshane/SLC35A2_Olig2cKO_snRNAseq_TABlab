@@ -13,7 +13,8 @@
 #' @return A list of Seurat objects with doublet classifications added to metadata.
 #'   New columns will include pANN scores and DF.classifications indicating
 #'   "Singlet" or "Doublet" status for each cell.
-#'
+#' @param save Logical; whether to save results (default = TRUE).
+#' @param save_dir Directory to save volcano plots.
 #' @details
 #' The function performs the following steps for each Seurat object:
 #' \itemize{
@@ -39,8 +40,15 @@
 #'
 #' @export
 
-find_dbl <- function(processed_list){
+find_dbl <- function(processed_list,
+                     save = FALSE,
+                     save_dir = NULL){
+  # Save check
+  if (save) {if (is.null(save_dir)) {stop("You must provide 'save_dir' when save = TRUE.")}
+    if (!dir.exists(save_dir)) {dir.create(save_dir, recursive = TRUE)}
+  }
   for (i in seq_along(processed_list)) {
+    
     # Set sequential processing to avoid cluster issues
     library(future)
     plan("sequential")
@@ -87,10 +95,31 @@ find_dbl <- function(processed_list){
       pK = optimal_pK,
       nExp = nExp_poi,
       reuse.pANN = FALSE,
-      sct = TRUE
+      sct = TRUE,
+      annotations = 
     )
     
+    # rename column
+    df_col <- grep("DF.classifications", colnames(test_sample@meta.data), value = TRUE)
+    if (length(df_col) > 0) {
+      # Rename to standardized name
+      colnames(test_sample@meta.data)[colnames(test_sample@meta.data) == df_col[1]] <- "Doublet_Status"
+      message("Renamed ", df_col[1], " to Doublet_Status")
+    }
+    
+    pann_cols <- grep("pANN", colnames(test_sample@meta.data), value = TRUE)
+    if (length(pann_cols) > 0) {
+      colnames(test_sample@meta.data)[colnames(test_sample@meta.data) == pann_cols[1]] <- "pANN"
+      message("Renamed ", pann_cols[1], " to pANN")
+    }
+    
     processed_list[[i]] <- test_sample
+    
+  }
+  
+  # Save if save is enabled
+  if (save){
+    qs::qsave(processed_list, file = file.path(save_dir, "04_processed_rna_list_dbl.qs"))
   }
   return(processed_list)
 }

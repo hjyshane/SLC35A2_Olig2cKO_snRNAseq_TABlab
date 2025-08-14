@@ -14,6 +14,7 @@ ref_mousebrain_annotation <- function(
     ref_obj,
     sobj,
     save = TRUE,
+    suffix = NULL,
     save_dir = NULL) {
   # Save check
   if (save) {if (is.null(save_dir)) {stop("You must provide 'save_dir' when save = TRUE.")}
@@ -42,8 +43,8 @@ ref_mousebrain_annotation <- function(
     metadata = predictions)
 
   # Save object
-  if (save) {qs::qsave(sobj, file = file.path(save_dir, "09_ref_annotated_obj.qs"))
-    message('Saved reference annotated object to: ', file.path(save_dir, "09_ref_annotated_obj.qs"), ".")
+  if (save) {qs::qsave(sobj, file = file.path(save_dir, paste0("09_ref_annotated_obj", suffix, ".qs")))
+    message('Saved reference annotated object to: ', file.path(save_dir, paste0("09_ref_annotated_obj", suffix, ".qs")), ".")
   }
   return(sobj)
   }
