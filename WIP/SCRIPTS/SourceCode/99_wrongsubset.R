@@ -1,6 +1,6 @@
 # (wrong approach- subsettied obj should be processed from integration) Work only with Olig population
 ## Subset Olig only and re-process
-```{r [O] Subset, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [O] Subset, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
 
@@ -13,9 +13,9 @@ oligsub_ref <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFO
 # Save
 qs::qsave(oligsub_man, file = file.path(qsave_dir, "a1_OligOnlyInit_manual.qs"))
 qs::qsave(oligsub_ref, file = file.path(qsave_dir, "a1_OligOnlyInit_refshort.qs"))
-```   
+# ```   
 
-```{r [O] Re-process, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [O] Re-process, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # oligsub_man <- qs::qread(file.path(qsave_dir, "a1_OligOnlyInit_refshort.qs"))
 # oligsub_ref <- qs::qread(file.path(qsave_dir, "a1_OligOnlyInit_manual.qs"))
@@ -30,14 +30,14 @@ oligsub_man <- process_oligsub(oligsub_man,
                                qsave_dir = qsave_dir)
 
 oligsub_ref <- process_oligsub(oligsub_ref,
-                           save = TRUE,
-                           suffix = "_refshort",
-                           qsave_dir = qsave_dir)
-```
+                               save = TRUE,
+                               suffix = "_refshort",
+                               qsave_dir = qsave_dir)
+# ```
 
 ## Initial visualization
 ### Manual cluster
-```{r [V] DimPlot manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [V] DimPlot manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # oligsub_man <- qs::qread(file.path(qsave_dir, "a2_olig_processed_manual.qs"))
 
@@ -62,10 +62,10 @@ ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_all_manual.
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_timepoint_manual.png"), dp_time, width = 9, height = 4, dpi = 300)
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_genotype_manual.png"), dp_geno, width = 9, height = 4, dpi = 300)
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_TimeGeno_manual.png"), dp_tg, width = 18, height = 4, dpi = 300)
-```
+#```
 
 ### ref_short cluster
-```{r [V] DimPlot refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+#```{r [V] DimPlot refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # oligsub_ref <- qs::qread(file.path(qsave_dir, "a2_olig_processed_refshort.qs"))
 
@@ -90,10 +90,10 @@ ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_all_refshor
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_timepoint_refshort.png"), dp_time, width = 9, height = 4, dpi = 300)
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_genotype_refshort.png"), dp_geno, width = 9, height = 4, dpi = 300)
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_TimeGeno_refshort.png"), dp_tg, width = 18, height = 4, dpi = 300)
-```
+#```
 
 ## Clustering oligsub
-```{r [O] Clustering, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+#```{r [O] Clustering, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07_clustering_oligsub.R')
 
 # Read previous object if needed.
@@ -101,27 +101,27 @@ ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_TimeGeno_re
 # oligsub_ref <- qs::qread(file.path(qsave_dir, "a2_olig_processed_refshort.qs"))
 
 oligsub_man <- clustering_oligsub(oligsub_man,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_manual",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
+                                  range_start = 0.1,
+                                  range_end = 1.2,
+                                  range_step = 0.1,
+                                  save = TRUE,
+                                  suffix = "_manual",
+                                  qsave_dir = qsave_dir,
+                                  markers_dir = file.path(csv_dir, "Markers"))
 
 oligsub_ref <- clustering_oligsub(oligsub_ref,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_refshort",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
+                                  range_start = 0.1,
+                                  range_end = 1.2,
+                                  range_step = 0.1,
+                                  save = TRUE,
+                                  suffix = "_refshort",
+                                  qsave_dir = qsave_dir,
+                                  markers_dir = file.path(csv_dir, "Markers"))
 
-```
+#```
 
 ### Manual clustering
-```{r [V] Check clusters - manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+#```{r [V] Check clusters - manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
 # oligsub_man <- qs::qread(file.path(qsave_dir, "a3_clustered_oligsub_manual.qs"))
 
@@ -134,7 +134,7 @@ olig_markers <- c(
   'Plp1', 'Mbp', 'Mag', 'Enpp4',
   'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
   "Tbx18", 'Vtn', 'Lum', 'Col1a2'
-  )
+)
 
 # Set assay and Idents
 Seurat::DefaultAssay(oligsub_man) <- 'RNA'
@@ -149,10 +149,10 @@ fp_olig <- Seurat::FeaturePlot(oligsub_man, features = olig_markers, label = T)
 
 # Save
 ggplot2::ggsave(fp_olig, file = file.path(plot_dir, "FeaturePlot_Olig_markers_manual.png"), width = 16, height= 28, dpi = 300)
-```
+#```
 
 ### ref_short clustering
-```{r [V] Check clusters - refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+#```{r [V] Check clusters - refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
 # oligsub_ref <- qs::qread(file.path(qsave_dir, "a3_clustered_oligsub_refshort.qs"))
 
@@ -178,9 +178,9 @@ fp_olig <- Seurat::FeaturePlot(oligsub_ref, features = olig_markers, label = T)
 
 # Save
 ggplot2::ggsave(fp_olig, file = file.path(plot_dir, "FeaturePlot_Olig_markers_refshort.png"), width = 16, height= 28, dpi = 300)
-```
+#```
 
-```{r [V] Visualization from paper, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+#```{r [V] Visualization from paper, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # https://www.sciencedirect.com/science/article/pii/S0959438817301150
 # https://www.sciencedirect.com/science/article/pii/S2213671124000778?via%3Dihub
 # https://www.sciencedirect.com/science/article/pii/S1534580718305586?via%3Dihub
@@ -197,13 +197,13 @@ Seurat::Idents(oligsub_ref) <- oligsub_ref$Olig_cluster_0.3
 
 # Markers list
 markers <- list(
-   OligMarkers = c('Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
-                   'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
-                   'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
-                   'Cnp',
-                   'Plp1', 'Mbp', 'Mag', 'Enpp4',
-                   'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
-                   "Tbx18", 'Vtn', 'Lum', 'Col1a2'),
+  OligMarkers = c('Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
+                  'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
+                  'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
+                  'Cnp',
+                  'Plp1', 'Mbp', 'Mag', 'Enpp4',
+                  'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
+                  "Tbx18", 'Vtn', 'Lum', 'Col1a2'),
   paper1 = c('Ascl1', 'Nfix', 'Dll3', 'Slc38a1', 'Rplp0', 'Rpl4', 'Eef2', 'Npas1', 'Hes', 'Epas1',
              'Pnlip', 'Pcp4', 'Ptprn', 'Nrarp', 'Clu', 'Gcp5', 'Ttyh1'),
   paper2 = c("Top2a", "Fyn", "Etv5", "Ednrb"),
@@ -219,7 +219,7 @@ markers <- list(
              "Neurod6", "Neurod1", "Neurod2", "Dlx1", "Satb2", "Sox8", "Nkx2-2", "Dbx2", "Barx2",
              "Npas1", "Nkx6-2", "Cux1", "Cux2", "Bcl11b"),
   IEGs = c("Jun", "Fos", "Egr1", "Junb")
-  )
+)
 
 # FeaturePlot
 Seurat::FeaturePlot(oligsub_man, features = markers[['OligMarkers']])
@@ -242,9 +242,9 @@ Seurat::FeaturePlot(oligsub_ref, features = markers[['paper5']])
 
 Seurat::FeaturePlot(oligsub_man, features = markers[['IEGs']])
 Seurat::FeaturePlot(oligsub_ref, features = markers[['IEGs']])
-```
+# ```
 
-```{r [O] Name cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [O] Name cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Set Idents
 Seurat::Idents(oligsub_man) <- oligsub_man$ref_short
 
@@ -259,7 +259,7 @@ map <- c(
   "1" = "MFOL",
   "6" = "Mature_OL", "4" = "Mature_OL",
   "2" = "OPC_2", "7" = "OPC_2", "8" = "OPC_2","10" = "OPC_2"
-  )
+)
 
 # Add to meta data
 oligsub_man@meta.data$OligSub <- map[as.character(oligsub_man$Olig_cluster_0.3)]
@@ -295,12 +295,12 @@ SeuratExtend::FeaturePlot3.grid(oligsub_ref, features = c('Pdgfra', 'Cspg4', 'So
 Seurat::FeaturePlot(oligsub_ref, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 'Mbp', 'Apod'), label = T)
 
 
-```
+# ```
 
 
 # (wrong approach- subsettied obj should be processed from integration) Work only with Olig population - Doublet ver.
 ## Subset Olig only and re-process
-```{r [O] Subset, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [O] Subset, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # integrated <- qs::qread(file.path(qsave_dir, "11_dbl_added.qs"))
 
@@ -313,9 +313,9 @@ oligsub_ref <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFO
 # Save
 qs::qsave(oligsub_man, file = file.path(qsave_dir, "b1_OligOnlyInit_manual.qs"))
 qs::qsave(oligsub_ref, file = file.path(qsave_dir, "b1_OligOnlyInit_refshort.qs"))
-```   
+# ```   
 
-```{r [O] Re-process, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [O] Re-process, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # oligsub_man <- qs::qread(file.path(qsave_dir, "b1_OligOnlyInit_refshort.qs"))
 # oligsub_ref <- qs::qread(file.path(qsave_dir, "b1_OligOnlyInit_manual.qs"))
@@ -332,11 +332,11 @@ oligsub_ref <- process_oligsub(oligsub_ref, save = F)
 # Save
 qs::qsave(oligsub_man, file = file.path(qsave_dir, "b2_olig_processed_manual.qs"))
 qs::qsave(oligsub_ref, file = file.path(qsave_dir, "b2_olig_processed_refshort.qs"))
-```
+# ```
 
 ## Initial visualization
 ### Manual cluster
-```{r [V] DimPlot manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [V] DimPlot manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # oligsub_man <- qs::qread(file.path(qsave_dir, "b2_olig_processed_manual.qs"))
 
@@ -349,10 +349,10 @@ dp_dbl <- Seurat::DimPlot(oligsub_man, reduction = 'umap', split.by = 'Doublet_S
 
 # Save
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_doublet_manual.png"), dp_dbl, width = 18, height = 4, dpi = 300)
-```
+# ```
 
 ### ref_short cluster
-```{r [V] DimPlot refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [V] DimPlot refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 # oligsub_ref <- qs::qread(file.path(qsave_dir, "b2_olig_processed_refshort.qs"))
 
@@ -365,10 +365,10 @@ dp_dbl <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', split.by = 'Doublet_S
 
 # Save
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_doublet_refshort.png"), dp_dbl, width = 18, height = 4, dpi = 300)
-```
+# ```
 
 ## Clustering oligsub
-```{r [O] Clustering, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# ```{r [O] Clustering, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # check save file name in source code, if you put save = T)
 # source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07_clustering_oligsub.R')
 
@@ -377,19 +377,19 @@ ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_doublet_ref
 # oligsub_ref <- qs::qread(file.path(qsave_dir, "b2_olig_processed_refshort.qs"))
 
 oligsub_man <- clustering_oligsub(oligsub_man,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = F)
+                                  range_start = 0.1,
+                                  range_end = 1.2,
+                                  range_step = 0.1,
+                                  save = F)
 
 oligsub_ref <- clustering_oligsub(oligsub_ref,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = F)
+                                  range_start = 0.1,
+                                  range_end = 1.2,
+                                  range_step = 0.1,
+                                  save = F)
 
 # Save
 qs::qsave(oligsub_man, file = file.path(qsave_dir, "b3_clustered_oligsub_manual.qs"))
 qs::qsave(oligsub_ref, file = file.path(qsave_dir, "b3_clustered_oligsub_refshort.qs"))
-```
+# ```
 
