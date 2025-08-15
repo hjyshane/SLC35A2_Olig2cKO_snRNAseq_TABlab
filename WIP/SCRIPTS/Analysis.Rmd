@@ -56,6 +56,9 @@ library(patchwork)
 library(EnhancedVolcano)
 library(enrichplot)
 library(ggtext)
+library(cowplot)
+library(ggpubr)
+library(reshape2)
 ```
 
 ```{r}
@@ -648,404 +651,8 @@ doublet_grouped <- integrated@meta.data %>%
   count(Doublet_Status)
 ```
 
-# (wrong approach- subsettied obj should be processed from integration) Work only with Olig population
-## Subset Olig only and re-process
-```{r [O] Subset, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
-
-# Subset based on manual
-oligsub_man <- subset(integrated, integrated$CellTypes %in% c("OPC", "NFOL", "MFOL"))
-
-# Subset based on manual
-oligsub_ref <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
-
-# Save
-qs::qsave(oligsub_man, file = file.path(qsave_dir, "a1_OligOnlyInit_manual.qs"))
-qs::qsave(oligsub_ref, file = file.path(qsave_dir, "a1_OligOnlyInit_refshort.qs"))
-```   
-
-```{r [O] Re-process, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# oligsub_man <- qs::qread(file.path(qsave_dir, "a1_OligOnlyInit_refshort.qs"))
-# oligsub_ref <- qs::qread(file.path(qsave_dir, "a1_OligOnlyInit_manual.qs"))
-
-# Normalize/process 
-# source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/06_process_oligsub.R')
-
-# Process integrated object
-oligsub_man <- process_oligsub(oligsub_man,
-                               save = TRUE,
-                               suffix = "_manual",
-                               qsave_dir = qsave_dir)
-
-oligsub_ref <- process_oligsub(oligsub_ref,
-                           save = TRUE,
-                           suffix = "_refshort",
-                           qsave_dir = qsave_dir)
-```
-
-## Initial visualization
-### Manual cluster
-```{r [V] DimPlot manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# oligsub_man <- qs::qread(file.path(qsave_dir, "a2_olig_processed_manual.qs"))
-
-# set assay and Idents
-Seurat::DefaultAssay(oligsub_man) <- "RNA"
-Seurat::Idents(oligsub_man) <- "MouseID"
-
-# DimPLot
-dp <- Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3) |
-  Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'GenoType', alpha = 0.3) |
-  Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = "MouseID", alpha = 0.3) |
-  Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = "SampleID", alpha = 0.3)
-
-dp_time <- Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3, split.by = "GenoType")
-
-dp_geno <- Seurat::DimPlot(oligsub_man, reduction = 'umap', group.by = 'GenoType', alpha = 0.3, split.by = "TimePoint")
-
-dp_tg <- Seurat::DimPlot(oligsub_man, reduction = 'umap', split.by = 'TimeGeno', alpha = 0.3)
-
-# Save
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_all_manual.png"), dp, width = 18, height = 4, dpi = 300)
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_timepoint_manual.png"), dp_time, width = 9, height = 4, dpi = 300)
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_genotype_manual.png"), dp_geno, width = 9, height = 4, dpi = 300)
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_TimeGeno_manual.png"), dp_tg, width = 18, height = 4, dpi = 300)
-```
-
-### ref_short cluster
-```{r [V] DimPlot refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# oligsub_ref <- qs::qread(file.path(qsave_dir, "a2_olig_processed_refshort.qs"))
-
-# set assay and Idents
-Seurat::DefaultAssay(oligsub_ref) <- "RNA"
-Seurat::Idents(oligsub_ref) <- "MouseID"
-
-# DimPLot
-dp <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3) |
-  Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'GenoType', alpha = 0.3) |
-  Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = "MouseID", alpha = 0.3) |
-  Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = "SampleID", alpha = 0.3)
-
-dp_time <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3, split.by = "GenoType")
-
-dp_geno <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', group.by = 'GenoType', alpha = 0.3, split.by = "TimePoint")
-
-dp_tg <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', split.by = 'TimeGeno', alpha = 0.3)
-
-# Save
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_all_refshort.png"), dp, width = 18, height = 4, dpi = 300)
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_timepoint_refshort.png"), dp_time, width = 9, height = 4, dpi = 300)
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_genotype_refshort.png"), dp_geno, width = 9, height = 4, dpi = 300)
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_TimeGeno_refshort.png"), dp_tg, width = 18, height = 4, dpi = 300)
-```
-
-## Clustering oligsub
-```{r [O] Clustering, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07_clustering_oligsub.R')
-
-# Read previous object if needed.
-# oligsub_man <- qs::qread(file.path(qsave_dir, "a2_olig_processed_manual.qs"))
-# oligsub_ref <- qs::qread(file.path(qsave_dir, "a2_olig_processed_refshort.qs"))
-
-oligsub_man <- clustering_oligsub(oligsub_man,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_manual",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
-
-oligsub_ref <- clustering_oligsub(oligsub_ref,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_refshort",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
-
-```
-
-### Manual clustering
-```{r [V] Check clusters - manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object if needed.
-# oligsub_man <- qs::qread(file.path(qsave_dir, "a3_clustered_oligsub_manual.qs"))
-
-# Olig markers
-olig_markers <- c(
-  'Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
-  'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
-  'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
-  'Cnp',
-  'Plp1', 'Mbp', 'Mag', 'Enpp4',
-  'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
-  "Tbx18", 'Vtn', 'Lum', 'Col1a2'
-  )
-
-# Set assay and Idents
-Seurat::DefaultAssay(oligsub_man) <- 'RNA'
-Seurat::Idents(oligsub_man) <- oligsub_man$Olig_cluster_0.3
-
-# Glimpse 
-Seurat::DimPlot(oligsub_man, reduction = "umap")
-
-
-# Feature plots
-fp_olig <- Seurat::FeaturePlot(oligsub_man, features = olig_markers, label = T)
-
-# Save
-ggplot2::ggsave(fp_olig, file = file.path(plot_dir, "FeaturePlot_Olig_markers_manual.png"), width = 16, height= 28, dpi = 300)
-```
-
-### ref_short clustering
-```{r [V] Check clusters - refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object if needed.
-# oligsub_ref <- qs::qread(file.path(qsave_dir, "a3_clustered_oligsub_refshort.qs"))
-
-# Olig markers
-olig_markers <- c(
-  'Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
-  'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
-  'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
-  'Cnp',
-  'Plp1', 'Mbp', 'Mag', 'Enpp4',
-  'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
-  "Tbx18", 'Vtn', 'Lum', 'Col1a2')
-
-# Set assay and Idents
-DefaultAssay(oligsub_ref) <- 'RNA'
-Idents(oligsub_ref) <- oligsub_ref$Olig_cluster_0.3
-
-# Glimpse 
-Seurat::DimPlot(oligsub_ref, reduction = "umap")
-
-# Feature plots
-fp_olig <- Seurat::FeaturePlot(oligsub_ref, features = olig_markers, label = T)
-
-# Save
-ggplot2::ggsave(fp_olig, file = file.path(plot_dir, "FeaturePlot_Olig_markers_refshort.png"), width = 16, height= 28, dpi = 300)
-```
-
-```{r [V] Visualization from paper, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# https://www.sciencedirect.com/science/article/pii/S0959438817301150
-# https://www.sciencedirect.com/science/article/pii/S2213671124000778?via%3Dihub
-# https://www.sciencedirect.com/science/article/pii/S1534580718305586?via%3Dihub
-# https://pmc.ncbi.nlm.nih.gov/articles/PMC5221728/pdf/emss-70326.pdf
-# https://onlinelibrary.wiley.com/doi/10.1111/epi.18413
-# https://pmc.ncbi.nlm.nih.gov/articles/PMC4691794/
-
-# Set assay and Idents
-Seurat::DefaultAssay(oligsub_man) <- "RNA"
-Seurat::DefaultAssay(oligsub_ref) <- "RNA"
-
-Seurat::Idents(oligsub_man) <- oligsub_man$Olig_cluster_0.3
-Seurat::Idents(oligsub_ref) <- oligsub_ref$Olig_cluster_0.3
-
-# Markers list
-markers <- list(
-   OligMarkers = c('Olig1', 'Olig2', 'Sox10', 'Cd9', 'Smarca4', 'Serinc5',
-                   'Pdgfra', 'Cspg4', 'Lhfpl3', 'Ptprz1', 'Pmp22',
-                   'Bmp4', 'Enpp6', 'Neu4', 'Prom1',
-                   'Cnp',
-                   'Plp1', 'Mbp', 'Mag', 'Enpp4',
-                   'Mog', 'Cnp', 'Cd82', 'Opalin', 'Klk6', 'Apod', 'Trf',  'Mobp',
-                   "Tbx18", 'Vtn', 'Lum', 'Col1a2'),
-  paper1 = c('Ascl1', 'Nfix', 'Dll3', 'Slc38a1', 'Rplp0', 'Rpl4', 'Eef2', 'Npas1', 'Hes', 'Epas1',
-             'Pnlip', 'Pcp4', 'Ptprn', 'Nrarp', 'Clu', 'Gcp5', 'Ttyh1'),
-  paper2 = c("Top2a", "Fyn", "Etv5", "Ednrb"),
-  paper3 = c("Adora1", "Brinp3", "Resp18", "Matn4", "Ccnb1", "Bche", "Cpm", "Elovl7", "Parvb", "Rspo2",
-             "Wnt8b", "Clic6", "Trpm3", "Pax2", "Arx", "Lhx6", "Col6a3", "Ddr2", "Abcc9", "Kcnj8",
-             "Gjb6", "Ranbp3l", "Itih2", "Il33"),
-  paper4 = c("Nr2e1", "Foxg1", "Neurod6", "Otx2", "Nkx2-1", "Eomes", "Hoxa13", "Hoxc11", "Hoxd9",
-             "Hoxa11", "Hoxc6", "Hoxb8", "Hoxa3", "Hoxb6", "Hoxc8", "Hoxc9", "Hoxc10", "Hoxa5", "Hoxa6",
-             "Hoxd10", "Hoxb2", "Hoxd11", "Hoxa9", "Hoxa7", "Hoxb7", "Hoxa10", "Hoxd9", "Hoxb9", "Pax8",
-             "Tlx3", "Nhlh2"),
-  paper5 = c("Gli1", "Ebf3", "Scrt2", "Mecom", "Lin28b", "Plag1", "Zic4", "Tcfap2b", "Osr1", "Tead2",
-             "Gli3", "Prdm6", "Bnc2", "Gli2", "Smad6", "Hoxb9", "Pax3", "Neurog2", "Lhx9", "Isl1",
-             "Neurod6", "Neurod1", "Neurod2", "Dlx1", "Satb2", "Sox8", "Nkx2-2", "Dbx2", "Barx2",
-             "Npas1", "Nkx6-2", "Cux1", "Cux2", "Bcl11b"),
-  IEGs = c("Jun", "Fos", "Egr1", "Junb")
-  )
-
-# FeaturePlot
-Seurat::FeaturePlot(oligsub_man, features = markers[['OligMarkers']])
-Seurat::FeaturePlot(oligsub_ref, features = markers[['OligMarkers']])
-
-Seurat::FeaturePlot(oligsub_man, features = markers[['paper1']])
-Seurat::FeaturePlot(oligsub_ref, features = markers[['paper1']])
-
-Seurat::FeaturePlot(oligsub_man, features = markers[['paper2']])
-Seurat::FeaturePlot(oligsub_ref, features = markers[['paper2']])
-
-Seurat::FeaturePlot(oligsub_man, features = markers[['paper3']])
-Seurat::FeaturePlot(oligsub_ref, features = markers[['paper3']])
-
-Seurat::FeaturePlot(oligsub_man, features = markers[['paper4']])
-Seurat::FeaturePlot(oligsub_ref, features = markers[['paper4']])
-
-Seurat::FeaturePlot(oligsub_man, features = markers[['paper5']])
-Seurat::FeaturePlot(oligsub_ref, features = markers[['paper5']])
-
-Seurat::FeaturePlot(oligsub_man, features = markers[['IEGs']])
-Seurat::FeaturePlot(oligsub_ref, features = markers[['IEGs']])
-```
-
-```{r [O] Name cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Set Idents
-Seurat::Idents(oligsub_man) <- oligsub_man$ref_short
-
-# Glimpse
-Seurat::DimPlot(oligsub_man, reduction = 'umap', label = T)
-
-# Map
-map <- c(
-  "0" = "OPC_1", "3" = "OPC_1",
-  "5" = "COP",
-  "9" = "NFOL",
-  "1" = "MFOL",
-  "6" = "Mature_OL", "4" = "Mature_OL",
-  "2" = "OPC_2", "7" = "OPC_2", "8" = "OPC_2","10" = "OPC_2"
-  )
-
-# Add to meta data
-oligsub_man@meta.data$OligSub <- map[as.character(oligsub_man$Olig_cluster_0.3)]
-
-# Set Idents
-Seurat::Idents(oligsub_man) <- oligsub_man$OligSub
-
-# Glimpse
-Seurat::DimPlot(oligsub_man, reduction = 'umap', label = T)
-
-# FeaturePlot
-SeuratExtend::FeaturePlot3.grid(oligsub_man, features = c('Pdgfra', 'Cspg4', 'Sox10', 'Enpp6', 'Mog', 'Plp1', 'Mag', 'Mbp', 'Opalin', 'Mobp', 'Serinc5', 'Apod'))
-
-Seurat::FeaturePlot(oligsub_man, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 'Mbp', 'Apod'), label = T)
-
-# Re-Subset based on manual
-oligsub_man2 <- subset(oligsub_man, oligsub_man$OligSub %in% c("OPC_1", "COP", "NFOL", "MFOL", "Mature_OL"))
-
-# Glimpse
-Seurat::DimPlot(oligsub_man2, reduction = 'umap', label = T, split.by = "TimeGeno", group.by = "OligSub")
-Seurat::FeaturePlot(oligsub_man2, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 'Mbp', 'Apod'), label = T)
-
-###############################################################
-# Set Idents
-Seurat::Idents(oligsub_ref) <- oligsub_ref$ref_short
-
-# Glimpse
-Seurat::DimPlot(oligsub_ref, reduction = 'umap', label = T)
-
-# FeaturePlot
-SeuratExtend::FeaturePlot3.grid(oligsub_ref, features = c('Pdgfra', 'Cspg4', 'Sox10', 'Enpp6', 'Mog', 'Plp1', 'Mag', 'Mbp', 'Opalin', 'Mobp', 'Serinc5', 'Apod'))
-
-Seurat::FeaturePlot(oligsub_ref, features = c('Pdgfra', 'Enpp6', 'Plp1', 'Mag', 'Mbp', 'Apod'), label = T)
-
-
-```
-
-
-# (wrong approach- subsettied obj should be processed from integration) Work only with Olig population - Doublet ver.
-## Subset Olig only and re-process
-```{r [O] Subset, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# integrated <- qs::qread(file.path(qsave_dir, "11_dbl_added.qs"))
-
-# Subset based on manual
-oligsub_man <- subset(integrated, integrated$CellTypes %in% c("OPC", "NFOL", "MFOL"))
-
-# Subset based on manual
-oligsub_ref <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
-
-# Save
-qs::qsave(oligsub_man, file = file.path(qsave_dir, "b1_OligOnlyInit_manual.qs"))
-qs::qsave(oligsub_ref, file = file.path(qsave_dir, "b1_OligOnlyInit_refshort.qs"))
-```   
-
-```{r [O] Re-process, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# oligsub_man <- qs::qread(file.path(qsave_dir, "b1_OligOnlyInit_refshort.qs"))
-# oligsub_ref <- qs::qread(file.path(qsave_dir, "b1_OligOnlyInit_manual.qs"))
-
-# Normalize/process 
-# check save file name in source code, if you put save = T)
-# source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/06_process_oligsub.R")
-
-# Process integrated object
-oligsub_man <- process_oligsub(oligsub_man, save = F)
-
-oligsub_ref <- process_oligsub(oligsub_ref, save = F)
-
-# Save
-qs::qsave(oligsub_man, file = file.path(qsave_dir, "b2_olig_processed_manual.qs"))
-qs::qsave(oligsub_ref, file = file.path(qsave_dir, "b2_olig_processed_refshort.qs"))
-```
-
-## Initial visualization
-### Manual cluster
-```{r [V] DimPlot manual, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# oligsub_man <- qs::qread(file.path(qsave_dir, "b2_olig_processed_manual.qs"))
-
-# set assay and Idents
-Seurat::DefaultAssay(oligsub_man) <- "RNA"
-Seurat::Idents(oligsub_man) <- "MouseID"
-
-# DimPLot
-dp_dbl <- Seurat::DimPlot(oligsub_man, reduction = 'umap', split.by = 'Doublet_Status', alpha = 0.3)
-
-# Save
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_doublet_manual.png"), dp_dbl, width = 18, height = 4, dpi = 300)
-```
-
-### ref_short cluster
-```{r [V] DimPlot refshort, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object
-# oligsub_ref <- qs::qread(file.path(qsave_dir, "b2_olig_processed_refshort.qs"))
-
-# set assay and Idents
-Seurat::DefaultAssay(oligsub_ref) <- "RNA"
-Seurat::Idents(oligsub_ref) <- "MouseID"
-
-# DimPLot
-dp_dbl <- Seurat::DimPlot(oligsub_ref, reduction = 'umap', split.by = 'Doublet_Status', alpha = 0.3)
-
-# Save
-ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_oligsub_doublet_refshort.png"), dp_dbl, width = 18, height = 4, dpi = 300)
-```
-
-## Clustering oligsub
-```{r [O] Clustering, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# check save file name in source code, if you put save = T)
-# source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07_clustering_oligsub.R')
-
-# Read previous object if needed.
-# oligsub_man <- qs::qread(file.path(qsave_dir, "b2_olig_processed_manual.qs"))
-# oligsub_ref <- qs::qread(file.path(qsave_dir, "b2_olig_processed_refshort.qs"))
-
-oligsub_man <- clustering_oligsub(oligsub_man,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = F)
-
-oligsub_ref <- clustering_oligsub(oligsub_ref,
-                         range_start = 0.1,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = F)
-
-# Save
-qs::qsave(oligsub_man, file = file.path(qsave_dir, "b3_clustered_oligsub_manual.qs"))
-qs::qsave(oligsub_ref, file = file.path(qsave_dir, "b3_clustered_oligsub_refshort.qs"))
-```
-
-
 # Proper subset and integration process
-## Subsett
+## Subset
 ```{r [O] Subset Olig, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Get individual RNA objects
 processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list_dbl.qs"))
@@ -1379,83 +986,150 @@ integrated_man_npc <- ref_mousebrain_annotation(ref_obj,
                                         suffix = "_man_npc",
                                         save_dir = qsave_dir
                                         )
-# Also, cleaned out metadata. all prediction score were deleted.
+```
+### Metadata cleaning
+```{r [O] Clean out metadata., echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_man.qs"))
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_man_npc.qs"))
 
+#  all prediction score were deleted.
+integrated_ref@meta.data <- integrated_ref@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated_ref@meta.data))]
 
+integrated_ref_npc@meta.data <- integrated_ref_npc@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated_ref_npc@meta.data))]
+
+integrated_man@meta.data <- integrated_man@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated_man@meta.data))]
+
+integrated_man_npc@meta.data <- integrated_man_npc@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated_man_npc@meta.data))]
+
+# Save
+qs::qsave(integrated_ref, file = file.path(qsave_dir, "10_ref.qs"))
+qs::qsave(integrated_man, file = file.path(qsave_dir, "10_man.qs"))
+qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "10_ref_npc.qs"))
+qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "10_man_npc.qs"))
 ```
 
+### Clean cluster name
 ```{r [O] Clean ref annotation, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
-# integrated_man <- qs::qread(file.path(qsave_dir, "09_annotated_ref.qs"))
-
-# Ref cell type prediction will be stored in oligsub_man2$predicted.id.
-Seurat::Idents(integrated_man) <- integrated_man$predicted.id
-
-# Visualize
-Seurat::DimPlot(integrated_man, reduction = "umap", label = T, repel = T) + NoLegend()
-
-# get names and shorten them
-ln <- unique(integrated_man$predicted.id)
-
-sn <- c("Ex_Cortex", "Microglia", "Ex_CA3", "NPC", "Ex_CA1", "Interneuron", "Astrocytes", "Granule_DG", "Microglia",
-        "MFOL", "Vascular", "Interneuron", "COP", "Interneuron", "Interneuron", "CGE", "Ependymal", "CGE",
-        "Mature_OL", "OPC", "Cajal_Retzius", "Interneuron", "Pericytes", "Interneuron", "RGL_DG", "Astrocytes", "Granule_Blast_DG",
-        "Macrophages", "Vascular","MGE", "NFOL", "Trilaminar", "Vascular", "Vascular", "Interneuron", "Vascular", "Interneuron")
-
-# Mapping sn-ln
-name_map <- setNames(sn, ln)
+# integrated_ref <- qs::qread(file.path(qsave_dir, "10_ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "10_man.qs"))
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "10_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "10_man_npc.qs"))
 
 # Function to replace long names to short names
 shortened <- function(name) {ifelse(name %in% names(name_map), name_map[name], name)}
 
-# Apply function
-integrated_man$ref_short <- shortened(integrated_man$predicted.id)
-
-# Check UMAP
-Seurat::Idents(integrated_man) <- "ref_short"
-dp_ref <- Seurat::DimPlot(integrated_man, reduction = "umap", label = T, repel = T) + Seurat::NoLegend()
-
-# Save
-ggplot2::ggsave(dp_ref, file = file.path(plot_dir, "DimPlot_mousebrain_ref_sub_ref.png"), width = 8, height = 8, dpi = 300)
-qs::qsave(integrated_man, file = file.path(qsave_dir, "09_annotated_ref.qs"))
-
-# Read previous object if needed.
-# integrated_man <- qs::qread(file.path(qsave_dir, "09_annotated_man.qs"))
-
 # Ref cell type prediction will be stored in oligsub_man2$predicted.id.
+Seurat::Idents(integrated_ref) <- integrated_ref$predicted.id
 Seurat::Idents(integrated_man) <- integrated_man$predicted.id
+Seurat::Idents(integrated_ref_npc) <- integrated_ref_npc$predicted.id
+Seurat::Idents(integrated_man_npc) <- integrated_man_npc$predicted.id
 
-# Visualize
-Seurat::DimPlot(integrated_man, reduction = "umap", label = T, repel = T) + NoLegend()
-
-# get names and shorten them
-ln <- unique(integrated_man$predicted.id)
-
-sn <- c("Ex_Cortex", "Microglia", "Ex_CA3", "NPC", "Ex_CA1", "Interneuron", "Astrocytes", "Granule_DG", "Microglia",
-        "MFOL", "Vascular", "Interneuron", "COP", "Interneuron", "Interneuron", "CGE", "Ependymal", "CGE",
-        "Mature_OL", "OPC", "Cajal_Retzius", "Interneuron", "Pericytes", "Interneuron", "RGL_DG", "Astrocytes", "Granule_Blast_DG",
-        "Macrophages", "Vascular","MGE", "NFOL", "Trilaminar", "Vascular", "Vascular", "Interneuron", "Vascular", "Interneuron")
-
-# Mapping sn-ln
+# get names and shorten them - ref
+ln <- unique(integrated_ref$predicted.id)
+sn <- c("MFOL", "Mature_OL", "OPC", "COP", "NFOL", "Interneuron", "ExCA1", "ExCortex", "ExCA3", "NPC", "Granule_DG", "Vascular", "Vascular", "Granule_Blast_DG", "Cajal_Retzius")
 name_map <- setNames(sn, ln)
+integrated_ref$ref_short2 <- shortened(integrated_ref$predicted.id)
 
-# Apply function
-integrated_man$ref_short <- shortened(integrated_man$predicted.id)
+# get names and shorten them - man
+ln <- unique(integrated_man$predicted.id)
+sn <- c("ExCA3", "ExCortex", "MFOL", "Mature_OL", "OPC", "COP", "Interneuron", "NFOL", "Interneuron", "MGE", "Granule_DG", "ExCA1", "Interneuron", "Cajal_Retzius", "CGE", "NPC", "Interneuron", "Vascular", "Vascular", "Granuel_Blast_DG")
+name_map <- setNames(sn, ln)
+integrated_man$ref_short2 <- shortened(integrated_man$predicted.id)
+
+# get names and shorten them - ref_npc
+ln <- unique(integrated_ref_npc$predicted.id)
+sn <- c("Vascular", "MFOL", "COP", "ExCortex", "Mature_OL", "OPC", "Microglia", "NFOL", "Interneuron", "Microglia", "Astrocytes", "NPC", "ExCA1", "ExCA3", "Granule_Blast_DG", "Cajal_Retzius", "Granule_DG", "Macrophages", "Interneuron", "Astrocytes", "Ependymal", "Vascular", "Interneuron", "RGL", "Vascular")
+name_map <- setNames(sn, ln)
+integrated_ref_npc$ref_short2 <- shortened(integrated_ref_npc$predicted.id)
+
+# get names and shorten them - man_npc
+ln <- unique(integrated_man_npc$predicted.id)
+sn <- c("ExCA3", "ExCortex", "MFOL", "Mature_OL", "OPC", "COP", "Interneuron", "NFOL", "Interneuron", "NPC", "MGE", "Granule_DG", "ExCA1", "Cajal_Retzius", "Interneuron", "Astrocytes", "CGE", "RGL", "Granule_Blast_DG", "Interneuron", "Vascular", "Vascular", "Astrocytes")
+name_map <- setNames(sn, ln)
+integrated_man_npc$ref_short2 <- shortened(integrated_man_npc$predicted.id)
 
 # Check UMAP
-Seurat::Idents(integrated_man) <- "ref_short"
-dp_ref <- Seurat::DimPlot(integrated_man, reduction = "umap", label = T, repel = T) + Seurat::NoLegend()
+Seurat::Idents(integrated_ref) <- "ref_short2"
+Seurat::Idents(integrated_man) <- "ref_short2"
+Seurat::Idents(integrated_ref_npc) <- "ref_short2"
+Seurat::Idents(integrated_man_npc) <- "ref_short2"
+
+
+Seurat::DimPlot(integrated_ref, reduction = "umap", label = T, repel = T) + Seurat::NoLegend() |
+Seurat::DimPlot(integrated_man, reduction = "umap", label = T, repel = T) + Seurat::NoLegend() |
+Seurat::DimPlot(integrated_ref_npc, reduction = "umap", label = T, repel = T) + Seurat::NoLegend() |
+Seurat::DimPlot(integrated_man_npc, reduction = "umap", label = T, repel = T) + Seurat::NoLegend()
 
 # Save
-ggplot2::ggsave(dp_ref, file = file.path(plot_dir, "DimPlot_mousebrain_ref_sub_man.png"), width = 8, height = 8, dpi = 300)
-qs::qsave(integrated_man, file = file.path(qsave_dir, "09_annotated_man.qs"))
+qs::qsave(integrated_ref, file = file.path(qsave_dir, "10_ref.qs"))
+qs::qsave(integrated_man, file = file.path(qsave_dir, "10_man.qs"))
+qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "10_ref_npc.qs"))
+qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "10_man_npc.qs"))
 ```
 
+## Visualize
+```{r}
+# Read previous object if needed.
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "10_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "10_man_npc.qs"))
 
+# Set marker genes to plot
+markers <- c('Aqp4', 'Aldh1l1', 'Gfap', 'P2ry12', 'Aif1', 'Tmem212', 'Foxj1', 'Gad1','Gad2', 'Slc17a7', 'Nes', 'Pdgfra', 'Cspg4', 'Enpp6', 'Plp1', 'Mog', 'Vim')
+
+# Order Column
+integrated_ref_npc$ref_short2 <- factor(integrated_ref_npc$ref_short2, levels = c("Astrocytes", "Microglia", "Macrophages", "Interneuron", "Cajal_Retzius", "Ependymal", "RGL", "ExCortex", "ExCA1", "ExCA3", "Granule_DG", "Granule_Blast_DG", "OPC", "COP", "NFOL", "MFOL", "Mature_OL", "NPC", "Vascular"))
+
+integrated_man_npc$ref_short2 <- factor(integrated_man_npc$ref_short2, levels = c("Astrocytes", "CGE", "MGE", "Interneuron", "Cajal_Retzius", "RGL", "ExCortex", "ExCA1", "ExCA3", "Granule_DG", "Granule_Blast_DG", "OPC", "COP", "NFOL", "MFOL", "Mature_OL", "NPC", "Vascular"))
+
+# save
+qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "10_ref_npc.qs"))
+qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "10_man_npc.qs"))
+
+# Create DotPlot
+Seurat::DotPlot(integrated_ref_npc, features = markers, group.by = "ref_short2",cols = c("darkgrey", "indianred1")) +
+  ggplot2::coord_flip() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.8, hjust = 1, size = 10), axis.text.y = ggplot2::element_text(size = 10), axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), legend.title = element_text(size = 10), legend.text = element_text(size = 8)) + ggtitle("ref based cluster subset") |
+Seurat::DotPlot(integrated_man_npc, features = markers, group.by = "ref_short2",cols = c("darkgrey", "indianred1")) +
+  ggplot2::coord_flip() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.8, hjust = 1, size = 10), axis.text.y = ggplot2::element_text(size = 10), axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), legend.title = element_text(size = 10), legend.text = element_text(size = 8)) + ggtitle("manual cluster subset")
+
+# DimPlot
+SeuratExtend::DimPlot2(integrated_ref_npc, reduction = 'umap', group.by = 'ref_short2', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("ref based cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
+SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'ref_short2', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2")
+
+SeuratExtend::DimPlot2(integrated_ref_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("ref based cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
+SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2")
+
+
+# FeaturePlot
+SeuratExtend::FeaturePlot3.grid(integrated_ref_npc, features = OligMarkers)
+SeuratExtend::FeaturePlot3.grid(integrated_ref_npc, features = OligMarkers_selected)
+Seurat::FeaturePlot(integrated_ref_npc, features = OligMarkers, label = T, repel = T)
+Seurat::FeaturePlot(integrated_ref_npc, features = OligMarkers_selected, label = T, repel = T)
+
+SeuratExtend::FeaturePlot3.grid(integrated_man_npc, features = OligMarkers)
+SeuratExtend::FeaturePlot3.grid(integrated_man_npc, features = OligMarkers_selected)
+Seurat::FeaturePlot(integrated_man_npc, features = OligMarkers, label = T, repel = T)
+Seurat::FeaturePlot(integrated_man_npc, features = OligMarkers_selected, label = T, repel = T)
+```
+
+# Filter
 ```{r [O] Filter low number cell cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-
+table(integrated_ref_npc$ref_short2)
+table(integrated_ref_npc$CellTypes)
+table(integrated_man_npc$ref_short2)
+table(integrated_man_npc$CellTypes)
 ```
 
+# DEG
 ```{r [O] DEG, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 
 ```

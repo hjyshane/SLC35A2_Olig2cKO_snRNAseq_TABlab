@@ -59,3 +59,19 @@ genes_to_plot <- c(
     "Col1a1",  # Vascular Cells
     "Vim"     # Marker for progenitor or stem-like cells
 )
+
+OligMarkers <- c(
+    'Pdgfra', 'Cspg4', 'Olig1', 'Olig2', 'Sox10', 'Sox6',            # OPC markers
+    'Ptprz1', 'Lhfpl3', 'Bmp4', 'Neu4', 'Id2', 'Id4', 'Tcf7l2',      # COP markers, Sox10 as well.
+    'Enpp6', 'Mog', 'Plp1', 'Prom1', 'Tspan2', 'Ctps1', 'Grp17',     # NFOL markers
+    'Mobp', 'Mag', 'Mal', 'Opalin', 'Serinc5', 'Cnp', 'Mbp', 'Myrf', # MFOL markers, Mog, Plp1 as well.
+    'Cnp', 'Klk6', 'Apod', 'Trf', 'Pmp22'                            # Mature_OL markers, Mobp, Mbp, Mag, Opalin,  Plp1 as well
+    )
+
+
+OligMarkers_selected <- c(
+    'Pdgfra', 'Olig2', 'Sox6',
+    'Ptprz1', 'Neu4', 'Sox10',
+    'Enpp6', 'Mog', 'Plp1', 
+    'Mag', 'Mbp', 'Cnp'
+)
