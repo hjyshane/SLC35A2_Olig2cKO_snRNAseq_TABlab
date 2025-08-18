@@ -17,11 +17,8 @@ FeaturePlot(integrated, features = "Bcl11b", label = T) |
     FeaturePlot(integrated, features = "Tle4", label = T) |
     FeaturePlot(integrated, features = "Foxp2", label = T)
 
-DimPlot(integrated, reduction= 'umap', label = T, repel = T) + NoLegend() |
+DimPlot(integrated, reduction= 'umap', label = T, repel = T, group.by = "RNA_cluster_0.7") + NoLegend() |
     DimPlot(integrated, reduction= 'umap', label = T, repel = T, group.by = "ref_short") + NoLegend()
-
-cells <- colnames(integrated)[integrated$ref_short == "Ex_Cortex"]
-DimPlot2(integrated, cells.highlight = cells)
 
 
 # Set idents
@@ -32,37 +29,38 @@ DimPlot(integrated, reduction = "umap", label = T) + NoLegend()
 
 # Finalized Clusters
 cell_type <- c(
-    "0" = "ExNeurons",
-    "1" = "ExNeurons",
-    "2" = "ExNeurons",
-    "6" = "ExNeurons",
-    "7" = "ExNeurons",
-    "10" = "ExNeurons",
-    "13" = "ExNeurons",
-    "14" = "ExNeurons",
-    "15" = "ExNeurons",
-    "18" = "ExNeurons",
-    "19" = "ExNeurons",
-    "22" = "ExNeurons",
-    "26" = "ExNeurons",
-    "28" = "ExNeurons",
-    "32" = "ExNeurons",
-    "33" = "ExNeurons",
-    "34" = "ExNeurons",
-    "36" = "ExNeurons",
-    "38" = "ExNeurons",
-    "48" = "ExNeurons",
+    "0" = "ExN",
+    "1" = "ExN",
+    "2" = "ExN",
+    "6" = "ExN",
+    "7" = "ExN",
+    "10" = "ExN",
+    "13" = "ExN",
+    "14" = "ExN",
+    "15" = "ExN",
+    "18" = "ExN",
+    "19" = "ExN",
+    "22" = "ExN",
+    "26" = "ExN",
+    "28" = "ExN",
+    "32" = "ExN",
+    "33" = "ExN",
+    "34" = "ExN",
+    "36" = "ExN",
+    "38" = "ExN",
+    "46" = "ExN",
+    "48" = "ExN",
 
-    "4" = "InNeurons",
-    "5" = "InNeurons",
-    "8" = "InNeurons",
-    "9" = "InNeurons",
-    "12" = "InNeurons",
-    "25" = "InNeurons",
-    "30" = "InNeurons",
-    "44" = "InNeurons",
-    "47" = "InNeurons",
-    "49" = "InNeurons",
+    "4" = "InhN",
+    "5" = "InhN",
+    "8" = "InhN",
+    "9" = "InhN",
+    "12" = "InhN",
+    "25" = "InhN",
+    "30" = "InhN",
+    "44" = "InhN",
+    "47" = "InhN",
+    "49" = "InhN",
 
     "27"  = "NPC",
 
@@ -72,30 +70,34 @@ cell_type <- c(
     "35" = "Astrocytes",
     "39" = "Astrocytes",
     "45" = "Astrocytes",
-    "46" = "Astrocytes",
     "50" = "Astrocytes",
 
     "17" = "Microglia",
     "24" = "Microglia",
 
-    "16" = "OPC",
-    "23" = "OPC",
+    "16" = "OPC_1",
+    
+    "23" = "OPC_2",
 
-    "42" = "NFOL",
+    "42" = "COP/NFOL",
 
     "21" = "MFOL",
-    "43" = "MFOL",
+    
+    "43" = "Mature_OL",
 
     "37" = "Ependymal",
+    
     "40" = "Ependymal",
 
-    "29" = "Pericytes",
+    "29" = "Vascular",
+    
     "31" = "Pericytes",
     "41" = "Pericytes"
 )
 
 # Assign the cell types to the metadata based on cluster IDs
 integrated@meta.data$CellTypes <- cell_type[as.character(integrated$RNA_cluster_0.7)]
+unique(integrated@meta.data$CellTypes)
 
 # Save
 qs::qsave(integrated, file = file.path(qsave_dir, "10_metadata_edited_obj.qs"))
