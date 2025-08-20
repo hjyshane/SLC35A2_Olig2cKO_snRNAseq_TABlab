@@ -1575,6 +1575,72 @@
       "Maintainer": "Martin Maechler <mmaechler+Matrix@gmail.com>",
       "Repository": "CRAN"
     },
+    "PCAtools": {
+      "Package": "PCAtools",
+      "Version": "2.14.0",
+      "Source": "Bioconductor",
+      "Type": "Package",
+      "Title": "PCAtools: Everything Principal Components Analysis",
+      "Authors@R": "c( person(\"Kevin\", \"Blighe\", role = c(\"aut\", \"cre\"), email = \"kevin@clinicalbioinformatics.co.uk\"), person(\"Anna-Leigh\", \"Brown\", role = c(\"ctb\")), person(\"Vincent\", \"Carey\", role = c(\"ctb\")), person(\"Guido\", \"Hooiveld\", role = c(\"ctb\")), person(\"Aaron\", \"Lun\", role = c(\"aut\", \"ctb\")))",
+      "Description": "Principal Component Analysis (PCA) is a very powerful technique that has wide applicability in data science, bioinformatics, and further afield. It was initially developed to analyse large volumes of data in order to tease out the differences/relationships between the logical entities being analysed. It extracts the fundamental structure of the data without the need to build any model to represent it. This 'summary' of the data is arrived at through a process of reduction that can transform the large number of variables into a lesser number that are uncorrelated (i.e. the 'principal components'), while at the same time being capable of easy interpretation on the original data. PCAtools provides functions for data exploration via PCA, and allows the user to generate publication-ready figures. PCA is performed via BiocSingular - users can also identify optimal number of principal components via different metrics, such as elbow method and Horn's parallel analysis, which has relevance for data reduction in single-cell RNA-seq (scRNA-seq) and high dimensional mass cytometry data.",
+      "License": "GPL-3",
+      "Depends": [
+        "ggplot2",
+        "ggrepel"
+      ],
+      "Imports": [
+        "lattice",
+        "grDevices",
+        "cowplot",
+        "methods",
+        "reshape2",
+        "stats",
+        "Matrix",
+        "DelayedMatrixStats",
+        "DelayedArray",
+        "BiocSingular",
+        "BiocParallel",
+        "Rcpp",
+        "dqrng"
+      ],
+      "Suggests": [
+        "testthat",
+        "scran",
+        "BiocGenerics",
+        "knitr",
+        "Biobase",
+        "GEOquery",
+        "hgu133a.db",
+        "ggplotify",
+        "beachmat",
+        "RMTstat",
+        "ggalt",
+        "DESeq2",
+        "airway",
+        "org.Hs.eg.db",
+        "magrittr",
+        "rmarkdown"
+      ],
+      "LinkingTo": [
+        "Rcpp",
+        "beachmat",
+        "BH",
+        "dqrng"
+      ],
+      "URL": "https://github.com/kevinblighe/PCAtools",
+      "biocViews": "RNASeq, ATACSeq, GeneExpression, Transcription, SingleCell, PrincipalComponent",
+      "VignetteBuilder": "knitr",
+      "SystemRequirements": "C++11",
+      "RoxygenNote": "7.1.1",
+      "Encoding": "UTF-8",
+      "git_url": "https://git.bioconductor.org/packages/PCAtools",
+      "git_branch": "RELEASE_3_18",
+      "git_last_commit": "42f92cf",
+      "git_last_commit_date": "2023-10-24",
+      "NeedsCompilation": "yes",
+      "Author": "Kevin Blighe [aut, cre], Anna-Leigh Brown [ctb], Vincent Carey [ctb], Guido Hooiveld [ctb], Aaron Lun [aut, ctb]",
+      "Maintainer": "Kevin Blighe <kevin@clinicalbioinformatics.co.uk>"
+    },
     "R6": {
       "Package": "R6",
       "Version": "2.6.1",
@@ -2982,6 +3048,50 @@
       "NeedsCompilation": "no",
       "Author": "Martin Morgan [aut], Valerie Obenchain [aut], Jim Hester [aut], Hervé Pagès [aut, cre]",
       "Maintainer": "Hervé Pagès <hpages.on.github@gmail.com>"
+    },
+    "TrajectoryUtils": {
+      "Package": "TrajectoryUtils",
+      "Version": "1.10.1",
+      "Source": "Bioconductor",
+      "Date": "2024-02-03",
+      "Title": "Single-Cell Trajectory Analysis Utilities",
+      "Description": "Implements low-level utilities for single-cell trajectory analysis, primarily intended for re-use inside higher-level packages. Include a function to create a cluster-level minimum spanning tree and data structures to hold pseudotime inference results.",
+      "Authors@R": "c( person(\"Aaron\", \"Lun\", role=c(\"aut\", \"cre\"), email=\"infinite.monkeys.with.keyboards@gmail.com\"), person(\"Kelly\", \"Street\", role=\"aut\") )",
+      "License": "GPL-3",
+      "biocViews": "GeneExpression, SingleCell",
+      "Depends": [
+        "SingleCellExperiment"
+      ],
+      "Imports": [
+        "methods",
+        "stats",
+        "Matrix",
+        "igraph",
+        "S4Vectors",
+        "SummarizedExperiment"
+      ],
+      "Suggests": [
+        "BiocNeighbors",
+        "DelayedArray",
+        "DelayedMatrixStats",
+        "BiocParallel",
+        "testthat",
+        "knitr",
+        "BiocStyle",
+        "rmarkdown"
+      ],
+      "VignetteBuilder": "knitr",
+      "RoxygenNote": "7.1.1",
+      "BugReports": "https://github.com/LTLA/TrajectoryUtils/issues",
+      "URL": "https://bioconductor.org/packages/TrajectoryUtils",
+      "git_url": "https://git.bioconductor.org/packages/TrajectoryUtils",
+      "git_branch": "RELEASE_3_18",
+      "git_last_commit": "5d8634e",
+      "git_last_commit_date": "2024-02-04",
+      "Repository": "Bioconductor 3.18",
+      "NeedsCompilation": "no",
+      "Author": "Aaron Lun [aut, cre], Kelly Street [aut]",
+      "Maintainer": "Aaron Lun <infinite.monkeys.with.keyboards@gmail.com>"
     },
     "XML": {
       "Package": "XML",
@@ -9305,6 +9415,40 @@
       "Maintainer": "Gabor Csardi <csardi.gabor@gmail.com>",
       "Repository": "CRAN"
     },
+    "princurve": {
+      "Package": "princurve",
+      "Version": "2.1.6",
+      "Source": "Repository",
+      "Title": "Fit a Principal Curve in Arbitrary Dimension",
+      "Authors@R": "c( person(\"Trevor\", \"Hastie\", email = \"trevor@research.att.com\", role = \"aut\"), person(\"Andreas\", \"Weingessel\", email = \"Andreas.Weingessel@ci.tuwien.ac.at\", role = \"aut\"), person( \"Kurt\", \"Hornik\",  email = \"kurt.hornik@wu.ac.at\",  role = \"aut\", comment = c(ORCID = \"0000-0003-4198-9911\") ), person( \"Henrik\", \"Bengtsson\",  email = \"henrikb@braju.com\",  role = \"ctb\", comment = c(github = \"HenrikBengtsson\") ), person( \"Robrecht\", \"Cannoodt\",  email = \"rcannood@gmail.com\",  role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0003-3641-729X\", github = \"rcannood\") ))",
+      "Description": "Fitting a principal curve to a data matrix in arbitrary dimensions.  Hastie and Stuetzle (1989) <doi:10.2307/2289936>.",
+      "License": "GPL-2",
+      "Encoding": "UTF-8",
+      "Depends": [
+        "R (>= 3.0)"
+      ],
+      "Imports": [
+        "stats",
+        "graphics",
+        "grDevices",
+        "Rcpp"
+      ],
+      "Suggests": [
+        "devtools",
+        "testthat"
+      ],
+      "LinkingTo": [
+        "Rcpp"
+      ],
+      "NeedsCompilation": "yes",
+      "RoxygenNote": "7.1.1",
+      "URL": "https://github.com/rcannood/princurve",
+      "BugReports": "https://github.com/rcannood/princurve/issues",
+      "Collate": "'RcppExports.R' 'bias_correct_curve.R' 'deprecated.R' 'package.R' 'periodic_lowess.R' 'smoother_functions.R' 'principal_curve.R' 'start_circle.R'",
+      "Author": "Trevor Hastie [aut], Andreas Weingessel [aut], Kurt Hornik [aut] (<https://orcid.org/0000-0003-4198-9911>), Henrik Bengtsson [ctb] (HenrikBengtsson), Robrecht Cannoodt [aut, cre] (<https://orcid.org/0000-0003-3641-729X>, rcannood)",
+      "Maintainer": "Robrecht Cannoodt <rcannood@gmail.com>",
+      "Repository": "CRAN"
+    },
     "processx": {
       "Package": "processx",
       "Version": "3.8.6",
@@ -11271,6 +11415,59 @@
       "Maintainer": "James Balamuta <balamut2@illinois.edu>",
       "Repository": "CRAN"
     },
+    "slingshot": {
+      "Package": "slingshot",
+      "Version": "2.10.0",
+      "Source": "Bioconductor",
+      "Title": "Tools for ordering single-cell sequencing",
+      "Description": "Provides functions for inferring continuous, branching  lineage structures in low-dimensional data. Slingshot was designed to model developmental trajectories in single-cell RNA sequencing  data and serve as a component in an analysis pipeline after  dimensionality reduction and clustering. It is flexible enough to  handle arbitrarily many branching events and allows for the  incorporation of prior knowledge through supervised graph  construction.",
+      "Authors@R": "c( person(\"Kelly\", \"Street\", email = \"street.kelly@gmail.com\", role = c(\"aut\", \"cre\", \"cph\")), person(\"Davide\",\"Risso\", role = \"aut\",email = \"risso.davide@gmail.com\"), person(\"Diya\",\"Das\", role = \"aut\", email = \"diyadas@berkeley.edu\"), person(\"Sandrine\",\"Dudoit\", role = \"ths\", email = \"sandrine@stat.berkeley.edu\"), person(\"Koen\",\"Van den Berge\", role = \"ctb\"), person( \"Robrecht\",  \"Cannoodt\",  email = \"rcannood@gmail.com\",  role = c(\"ctb\"), comment = c(ORCID = \"0000-0003-3641-729X\", github = \"rcannood\") ))",
+      "License": "Artistic-2.0",
+      "Depends": [
+        "R (>= 4.0)",
+        "princurve (>= 2.0.4)",
+        "stats",
+        "TrajectoryUtils"
+      ],
+      "Imports": [
+        "graphics",
+        "grDevices",
+        "igraph",
+        "matrixStats",
+        "methods",
+        "S4Vectors",
+        "SingleCellExperiment",
+        "SummarizedExperiment"
+      ],
+      "Suggests": [
+        "BiocGenerics",
+        "BiocStyle",
+        "clusterExperiment",
+        "DelayedMatrixStats",
+        "knitr",
+        "mclust",
+        "mgcv",
+        "RColorBrewer",
+        "rgl",
+        "rmarkdown",
+        "testthat",
+        "uwot",
+        "covr"
+      ],
+      "VignetteBuilder": "knitr",
+      "LazyData": "false",
+      "RoxygenNote": "7.2.0",
+      "Encoding": "UTF-8",
+      "biocViews": "Clustering, DifferentialExpression, GeneExpression, RNASeq, Sequencing, Software, Sequencing, SingleCell, Transcriptomics, Visualization",
+      "BugReports": "https://github.com/kstreet13/slingshot/issues",
+      "git_url": "https://git.bioconductor.org/packages/slingshot",
+      "git_branch": "RELEASE_3_18",
+      "git_last_commit": "9166218",
+      "git_last_commit_date": "2023-10-24",
+      "NeedsCompilation": "no",
+      "Author": "Kelly Street [aut, cre, cph], Davide Risso [aut], Diya Das [aut], Sandrine Dudoit [ths], Koen Van den Berge [ctb], Robrecht Cannoodt [ctb] (<https://orcid.org/0000-0003-3641-729X>, rcannood)",
+      "Maintainer": "Kelly Street <street.kelly@gmail.com>"
+    },
     "snow": {
       "Package": "snow",
       "Version": "0.4-4",
@@ -11442,9 +11639,9 @@
     },
     "spatstat.data": {
       "Package": "spatstat.data",
-      "Version": "3.1-6",
+      "Version": "3.1-8",
       "Source": "Repository",
-      "Date": "2025-03-17",
+      "Date": "2025-08-18",
       "Title": "Datasets for 'spatstat' Family",
       "Authors@R": "c(person(\"Adrian\", \"Baddeley\",  role = c(\"aut\", \"cre\"), email = \"Adrian.Baddeley@curtin.edu.au\", comment = c(ORCID=\"0000-0001-9499-8382\")), person(\"Rolf\", \"Turner\",  role = \"aut\", email=\"rolfturner@posteo.net\", comment=c(ORCID=\"0000-0001-5521-5218\")), person(\"Ege\",   \"Rubak\",  role = \"aut\", email = \"rubak@math.aau.dk\", comment=c(ORCID=\"0000-0002-6675-533X\")), person(\"W\", \"Aherne\", role=\"ctb\"), person(\"Freda\", \"Alexander\", role=\"ctb\"), person(\"Qi Wei\", \"Ang\", role=\"ctb\"), person(\"Sourav\", \"Banerjee\", role=\"ctb\"), person(\"Mark\", \"Berman\", role=\"ctb\"), person(\"R\", \"Bernhardt\", role=\"ctb\"), person(\"Thomas\", \"Berndtsen\", role=\"ctb\"), person(\"Andrew\", \"Bevan\", role=\"ctb\"), person(\"Jeffrey\", \"Betts\", role=\"ctb\"), person(\"Ray\", \"Cartwright\", role=\"ctb\"), person(\"Lucia\", \"Cobo Sanchez\", role=\"ctb\"), person(\"Richard\", \"Condit\", role=\"ctb\"), person(\"Francis\", \"Crick\", role=\"ctb\"), person(\"Marcelino\", \"de la Cruz Rot\", role=\"ctb\"), person(\"Jack\", \"Cuzick\", role=\"ctb\"), person(\"Tilman\", \"Davies\", role=\"ctb\"), person(\"Peter\", \"Diggle\", role=\"ctb\"), person(\"Michael\", \"Drinkwater\", role=\"ctb\"), person(\"Stephen\", \"Eglen\", role=\"ctb\"), person(\"Robert\", \"Edwards\", role=\"ctb\"), person(\"Johannes\", \"Elias\", role=\"ctb\"), person(\"AE\", \"Esler\", role=\"ctb\"), person(\"Gregory\", \"Evans\", role=\"ctb\"), person(\"Bernard\", \"Fingleton\", role=\"ctb\"), person(\"Olivier\", \"Flores\", role=\"ctb\"), person(\"David\", \"Ford\", role=\"ctb\"), person(\"Robin\", \"Foster\", role=\"ctb\"), person(\"Janet\", \"Franklin\", role=\"ctb\"), person(\"Neba\", \"Funwi-Gabga\", role=\"ctb\"), person(\"DJ\", \"Gerrard\", role=\"ctb\"), person(\"Andy\", \"Green\", role=\"ctb\"), person(\"Tim\", \"Griffin\", role=\"ctb\"), person(\"Ute\", \"Hahn\", role=\"ctb\"), person(\"RD\", \"Harkness\", role=\"ctb\"), person(\"Arthur\", \"Hickman\", role=\"ctb\"), person(\"Stephen\", \"Hubbell\", role=\"ctb\"), person(\"Austin\", \"Hughes\", role=\"ctb\"), person(\"Jonathan\", \"Huntington\", role=\"ctb\"), person(\"MJ\", \"Hutchings\", role=\"ctb\"), person(\"Jackie\", \"Inwald\", role=\"ctb\"), person(\"Valerie\", \"Isham\", role=\"ctb\"), person(\"Aruna\", \"Jammalamadaka\", role=\"ctb\"), person(\"Carl\", \"Knox-Robinson\", role=\"ctb\"), person(\"Mahdieh\", \"Khanmohammadi\", role=\"ctb\"), person(\"Tero\", \"Kokkila\", role=\"ctb\"), person(\"Bas\", \"Kooijman\", role=\"ctb\"), person(\"Kenneth\", \"Kosik\", role=\"ctb\"), person(\"Peter\", \"Kovesi\", role=\"ctb\"), person(\"Lily\", \"Kozmian-Ledward\", role=\"ctb\"), person(\"Robert\", \"Lamb\", role=\"ctb\"), person(\"NA\", \"Laskurain\", role=\"ctb\"), person(\"George\", \"Leser\", role=\"ctb\"), person(\"Marie-Colette\", \"van Lieshout\", role=\"ctb\"), person(\"AF\", \"Mark\", role=\"ctb\"), person(\"Sebastian\", \"Meyer\", role=\"ctb\"), person(\"Jorge\", \"Mateu\", role=\"ctb\"), person(\"Annikki\", \"Makela\", role=\"ctb\"), person(\"Enrique\", \"Miranda\", role=\"ctb\"), person(\"Nicoletta\", \"Nava\", role=\"ctb\"), person(\"M\", \"Numata\", role=\"ctb\"), person(\"Matti\", \"Nummelin\", role=\"ctb\"), person(\"Jens Randel\", \"Nyengaard\", role=\"ctb\"), person(\"Yosihiko\", \"Ogata\", role=\"ctb\"), person(\"Si\", \"Palmer\", role=\"ctb\"), person(\"Antti\", \"Penttinen\", role=\"ctb\"), person(\"Sandra\", \"Pereira\", role=\"ctb\"), person(\"Nicolas\", \"Picard\", role=\"ctb\"), person(\"William\", \"Platt\", role=\"ctb\"), person(\"Stephen\", \"Rathbun\", role=\"ctb\"), person(\"Brian\", \"Ripley\", role=\"ctb\"), person(\"Roger\", \"Sainsbury\", role=\"ctb\"), person(\"Dietrich\", \"Stoyan\", role=\"ctb\"), person(\"David\", \"Strauss\", role=\"ctb\"), person(\"L\", \"Strand\", role=\"ctb\"), person(\"Masaharu\", \"Tanemura\", role=\"ctb\"), person(\"Graham\", \"Upton\", role=\"ctb\"), person(\"Bill\", \"Venables\", role=\"ctb\"), person(\"Ulrich\", \"Vogel\", role=\"ctb\"), person(\"Sasha\", \"Voss\", role=\"ctb\"), person(\"Rasmus\", \"Waagepetersen\", role=\"ctb\"), person(\"Keith\", \"Watkins\", role=\"ctb\"), person(\"H\", \"Wendrock\", role=\"ctb\") )",
       "Maintainer": "Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>",
@@ -11469,7 +11666,7 @@
       "NeedsCompilation": "no",
       "ByteCompile": "true",
       "BugReports": "https://github.com/spatstat/spatstat.data/issues",
-      "Author": "Adrian Baddeley [aut, cre] (<https://orcid.org/0000-0001-9499-8382>), Rolf Turner [aut] (<https://orcid.org/0000-0001-5521-5218>), Ege Rubak [aut] (<https://orcid.org/0000-0002-6675-533X>), W Aherne [ctb], Freda Alexander [ctb], Qi Wei Ang [ctb], Sourav Banerjee [ctb], Mark Berman [ctb], R Bernhardt [ctb], Thomas Berndtsen [ctb], Andrew Bevan [ctb], Jeffrey Betts [ctb], Ray Cartwright [ctb], Lucia Cobo Sanchez [ctb], Richard Condit [ctb], Francis Crick [ctb], Marcelino de la Cruz Rot [ctb], Jack Cuzick [ctb], Tilman Davies [ctb], Peter Diggle [ctb], Michael Drinkwater [ctb], Stephen Eglen [ctb], Robert Edwards [ctb], Johannes Elias [ctb], AE Esler [ctb], Gregory Evans [ctb], Bernard Fingleton [ctb], Olivier Flores [ctb], David Ford [ctb], Robin Foster [ctb], Janet Franklin [ctb], Neba Funwi-Gabga [ctb], DJ Gerrard [ctb], Andy Green [ctb], Tim Griffin [ctb], Ute Hahn [ctb], RD Harkness [ctb], Arthur Hickman [ctb], Stephen Hubbell [ctb], Austin Hughes [ctb], Jonathan Huntington [ctb], MJ Hutchings [ctb], Jackie Inwald [ctb], Valerie Isham [ctb], Aruna Jammalamadaka [ctb], Carl Knox-Robinson [ctb], Mahdieh Khanmohammadi [ctb], Tero Kokkila [ctb], Bas Kooijman [ctb], Kenneth Kosik [ctb], Peter Kovesi [ctb], Lily Kozmian-Ledward [ctb], Robert Lamb [ctb], NA Laskurain [ctb], George Leser [ctb], Marie-Colette van Lieshout [ctb], AF Mark [ctb], Sebastian Meyer [ctb], Jorge Mateu [ctb], Annikki Makela [ctb], Enrique Miranda [ctb], Nicoletta Nava [ctb], M Numata [ctb], Matti Nummelin [ctb], Jens Randel Nyengaard [ctb], Yosihiko Ogata [ctb], Si Palmer [ctb], Antti Penttinen [ctb], Sandra Pereira [ctb], Nicolas Picard [ctb], William Platt [ctb], Stephen Rathbun [ctb], Brian Ripley [ctb], Roger Sainsbury [ctb], Dietrich Stoyan [ctb], David Strauss [ctb], L Strand [ctb], Masaharu Tanemura [ctb], Graham Upton [ctb], Bill Venables [ctb], Ulrich Vogel [ctb], Sasha Voss [ctb], Rasmus Waagepetersen [ctb], Keith Watkins [ctb], H Wendrock [ctb]",
+      "Author": "Adrian Baddeley [aut, cre] (ORCID: <https://orcid.org/0000-0001-9499-8382>), Rolf Turner [aut] (ORCID: <https://orcid.org/0000-0001-5521-5218>), Ege Rubak [aut] (ORCID: <https://orcid.org/0000-0002-6675-533X>), W Aherne [ctb], Freda Alexander [ctb], Qi Wei Ang [ctb], Sourav Banerjee [ctb], Mark Berman [ctb], R Bernhardt [ctb], Thomas Berndtsen [ctb], Andrew Bevan [ctb], Jeffrey Betts [ctb], Ray Cartwright [ctb], Lucia Cobo Sanchez [ctb], Richard Condit [ctb], Francis Crick [ctb], Marcelino de la Cruz Rot [ctb], Jack Cuzick [ctb], Tilman Davies [ctb], Peter Diggle [ctb], Michael Drinkwater [ctb], Stephen Eglen [ctb], Robert Edwards [ctb], Johannes Elias [ctb], AE Esler [ctb], Gregory Evans [ctb], Bernard Fingleton [ctb], Olivier Flores [ctb], David Ford [ctb], Robin Foster [ctb], Janet Franklin [ctb], Neba Funwi-Gabga [ctb], DJ Gerrard [ctb], Andy Green [ctb], Tim Griffin [ctb], Ute Hahn [ctb], RD Harkness [ctb], Arthur Hickman [ctb], Stephen Hubbell [ctb], Austin Hughes [ctb], Jonathan Huntington [ctb], MJ Hutchings [ctb], Jackie Inwald [ctb], Valerie Isham [ctb], Aruna Jammalamadaka [ctb], Carl Knox-Robinson [ctb], Mahdieh Khanmohammadi [ctb], Tero Kokkila [ctb], Bas Kooijman [ctb], Kenneth Kosik [ctb], Peter Kovesi [ctb], Lily Kozmian-Ledward [ctb], Robert Lamb [ctb], NA Laskurain [ctb], George Leser [ctb], Marie-Colette van Lieshout [ctb], AF Mark [ctb], Sebastian Meyer [ctb], Jorge Mateu [ctb], Annikki Makela [ctb], Enrique Miranda [ctb], Nicoletta Nava [ctb], M Numata [ctb], Matti Nummelin [ctb], Jens Randel Nyengaard [ctb], Yosihiko Ogata [ctb], Si Palmer [ctb], Antti Penttinen [ctb], Sandra Pereira [ctb], Nicolas Picard [ctb], William Platt [ctb], Stephen Rathbun [ctb], Brian Ripley [ctb], Roger Sainsbury [ctb], Dietrich Stoyan [ctb], David Strauss [ctb], L Strand [ctb], Masaharu Tanemura [ctb], Graham Upton [ctb], Bill Venables [ctb], Ulrich Vogel [ctb], Sasha Voss [ctb], Rasmus Waagepetersen [ctb], Keith Watkins [ctb], H Wendrock [ctb]",
       "Repository": "CRAN"
     },
     "spatstat.explore": {

@@ -1,0 +1,5 @@
+Do not make output folder, just name it in shell script (pipeline will make folder) 
+
+Index 1 = fw i7 
+
+Index 2 = reverse complement i5 sequence  

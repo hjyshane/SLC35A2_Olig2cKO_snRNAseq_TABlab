@@ -20,7 +20,7 @@ server <- function(input, output, session) {
         output$featurePlot <- renderPlot({
             req(input$gene)
             FeaturePlot(
-                object = integrated, # Change object here
+                object = integrated_man_npc, # Change object here
                 features = input$gene,  # Fixed: use the actual gene input
                 reduction = "umap",
                 label = TRUE,
@@ -45,5 +45,6 @@ server <- function(input, output, session) {
         }
     )
 }
+
 # Run the application
 shinyApp(ui = ui, server = server)

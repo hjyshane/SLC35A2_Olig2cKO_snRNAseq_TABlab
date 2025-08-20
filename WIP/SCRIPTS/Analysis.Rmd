@@ -18,10 +18,12 @@ library(parallel)
 library(future)
 library(Seurat)
 library(glmGamPoi)
-library(SeuratExtend)
 library(clusterProfiler)
 library(DoubletFinder)
 library(PCAtools)
+
+# Pseudotime analysis
+library(slingshot)
 
 # library(rrvgo)
 library(SoupX)
@@ -52,12 +54,14 @@ library(tidyverse)
 # Visualization
 library(ggplot2)
 library(ggstats)
+library(SeuratExtend)
 library(patchwork)
 library(EnhancedVolcano)
 library(enrichplot)
 library(ggtext)
 library(cowplot)
 library(ggpubr)
+library(viridis)
 library(reshape2)
 ```
 
@@ -79,6 +83,12 @@ source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07__clustering.R')
 source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/08__ref_mousebrain_annotation.R')
 source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_doublet_process_rna.R')
 
+# For interactive DimPlot
+# "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_interactiveDimPlot.R"
+# For FeaturePlot 
+# "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_shiny_featureplot.R"
+# For Gene list used
+# "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_gene_list.R"
 ```
 
 ## Folder directory
@@ -1155,6 +1165,13 @@ Seurat::DimPlot(integrated_ref_npc, reduction = "umap", label = TRUE, repel = TR
 # Set marker genes to plot
 markers <- c("Olig2", "Pdgfra", "Neu4", "Enpp6", "Mog", "Mag", "Mbp", 'P2ry12', 'Nes', 'Vim')
 OligMarkers_selected <-  c("Olig2", "Pdgfra", "Neu4", "Enpp6", "Mog", "Mag", "Mbp")
+OligMarkers <- c(
+    'Pdgfra', 'Cspg4', 'Olig1', 'Olig2', 'Sox10', 'Sox6',            # OPC markers
+    'Ptprz1', 'Lhfpl3', 'Bmp4', 'Neu4', 'Id2', 'Id4', 'Tcf7l2',      # COP markers, Sox10 as well.
+    'Enpp6', 'Mog', 'Plp1', 'Prom1', 'Tspan2',                       # NFOL markers 'Ctps1', 'Grp17',    
+    'Mobp', 'Mag', 'Mal', 'Opalin', 'Serinc5', 'Cnp', 'Mbp', 'Myrf', # MFOL markers, Mog, Plp1 as well.
+    'Cnp', 'Klk6', 'Apod', 'Trf', 'Pmp22'                            # Mature_OL markers, Mobp, Mbp, Mag, Opalin,  Plp1 as well
+    )
 ```
 
 #### DotPlot
@@ -1220,7 +1237,6 @@ Seurat::FeaturePlot(integrated_man_npc, features = OligMarkers_selected, label =
 DimPlot(integrated_man_npc, reduction = "umap", label = T, repel = T, group.by = "CellTypes2") + NoLegend() + NoLegend() |
   DimPlot(integrated_ref_npc, reduction = "umap", label = T, repel = T, group.by = "CellTypes2") + NoLegend()
 
-
 SeuratExtend::DimPlot2(integrated_ref_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, 
                        theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("ref based cluster subset"))) +  
   theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
@@ -1251,7 +1267,8 @@ SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'CellT
 # integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
 
 Idents(integrated_man_npc) <- "CellTypes2"
-DimPlot(integrated_man_npc, label = T, repel = T) + NoLegend()
+Oligdp <- DimPlot(integrated_man_npc, label = T, repel = T) + NoLegend()
+oligdpfeature <- FeaturePlot(integrated_man_npc, features = OligMarkers, label = T, repel = T)
 FeaturePlot(integrated_man_npc, features = OligMarkers_selected)
 FeaturePlot(integrated_man_npc, features = markers)
 
@@ -1259,9 +1276,13 @@ Idents(integrated_ref_npc) <- "CellTypes2"
 DimPlot(integrated_ref_npc, label = T, repel = T) + NoLegend()
 FeaturePlot(integrated_ref_npc, features = OligMarkers_selected)
 FeaturePlot(integrated_ref_npc, features = markers)
+
+# save
+ggplot2::ggsave(Oligdp, file = file.path(plot_dir, "DimPlot_OligManSub.png"), width = 8, height = 8, dpi = 300)
+ggplot2::ggsave(oligdpfeature, file = file.path(plot_dir, "FeaturePlot_OligManSub.png"), width = 32, height = 32, dpi = 300)
 ```
 
-### PCA visualization check
+## PCA visualization check
 ```{r [V] PCA check , echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
 # integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
@@ -1336,11 +1357,114 @@ immature..?
 _Zgrf1, Zwilch_ - proliferation/mitotic 
 proliferating OPC?
 
-##### **OPC_3**
+#### **OPC_3**
 **+**: Zmat4 (+3.67), Zic5 (+0.88), Zic2 (+0.77), Zic1 (+1.08), Zic4 (+2.16),  Zkscan16 (+1.30), Zfyve28 (+2.34), Zmym3 (+0.99)
 **-**: Zwilch (−0.77), Zgrf1 (−1.10)
 Zic family transcription factor
 differentiation/lineage commitment?
+
+##### Some markers from paper.
+```{r [V], echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+papermarkers <- c("Npas1", "Clu", "Epas1", "Pnlip", "Ptprn", "Hes5", "Nrarp", "Notch", "Slc38a1")
+
+Idents(integrated_man_npc) <- "CellTypes2"
+fp <- FeaturePlot(integrated_man_npc, features = papermarkers, label = T, repel = T)
+
+# save
+ggplot2::ggsave(fp, file = file.path(plot_dir, "FeaturePlot_OligManSub_papermarker.png"), width = 12, height = 12, dpi = 300)
+```
+
+## Slingshot for pseudotime analysis
+```{r Slingshot echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_slingshotOPC.R"
+# Read previous object if needed.
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+
+#Pseudotime prep subset object
+OPC_subset <- subset(integrated_man_npc, subset = CellTypes2 %in% c("OPC_1", "OPC_2", "OPC_3"))
+umap <- Embeddings(OPC_subset, "umap")
+celltype <- OPC_subset$CellTypes2
+
+umap2 <- Embeddings(integrated_man_npc, "umap")
+celltype2 <- integrated_man_npc$CellTypes2
+
+# Pseudotime Sligshot
+lineages <- slingshot(umap, clusterLabels = celltype, reducedDim = "UMAP")
+lineages2 <- slingshot(umap2, clusterLabels = celltype2, reducedDim = "UMAP")
+
+# Convert the UMAP embeddings into a data frame for plotting
+umap_df <- as.data.frame(umap)
+colnames(umap_df) <- c("umap_1", "umap_2")
+umap_df$cell_type <- celltype
+umap_df <- cbind(umap_df, OPC_subset@meta.data)
+
+umap_df2 <- as.data.frame(umap2)
+colnames(umap_df2) <- c("umap_1", "umap_2")
+umap_df2$cell_type <- celltype2
+umap_df2 <- cbind(umap_df2, integrated_man_npc@meta.data)
+
+# Extract pseudotime from the first lineage (if multiple lineages exist, you can choose the one of interest)
+umap_df$pseudotime <-  lineages@assays@data@listData[["pseudotime"]]
+umap_df2$pseudotime <-  lineages2@assays@data@listData[["pseudotime"]]
+
+# Plot UMAP with pseudotime as color
+pseudo <- ggplot(umap_df, aes(x = umap_1, y = umap_2, color = pseudotime)) +
+  geom_point(size = 1) +
+  scale_color_viridis_c(na.value = "grey50") +
+  labs(title = "Pseudotime Trajectory (Slingshot)",
+       color = "Pseudotime") +
+  theme_minimal()
+
+pseudo2 <- ggplot(umap_df2, aes(x = umap_1, y = umap_2, color = pseudotime)) +
+  geom_point(size = 1) +
+  scale_color_viridis_c(na.value = "grey50") +
+  labs(title = "Pseudotime Trajectory (Slingshot)",
+       color = "Pseudotime") +
+  theme_minimal()
+
+condition <-ggplot(umap_df, aes(x = umap_1, y = umap_2, color = pseudotime)) +
+  geom_point(size = 1) +
+  scale_color_viridis_c(na.value = "grey50") +
+  facet_wrap(~ TimeGeno) +  # adjust as needed
+  labs(title = "Pseudotime by Condition",
+       x = "UMAP 1", y = "UMAP 2") +
+  theme_minimal()
+
+# density plot
+density <- ggplot(umap_df, aes(x = pseudotime, color = TimeGeno, fill = TimeGeno)) +
+  geom_density(alpha = 0.3) +
+  labs(title = "Pseudotime Density by Time Point", x = "Pseudotime", y = "Density") +
+  theme_minimal() +
+  scale_color_viridis_d() +
+  scale_fill_viridis_d()
+
+# bar plot
+bar <- ggplot(umap_df, aes(x = TimeGeno, y = pseudotime, fill = TimeGeno)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(title = "Pseudotime Distribution by Time Point", x = "Time", y = "Pseudotime") +
+  theme_minimal() +
+  scale_fill_viridis_d()
+
+# save
+ggsave(filename = file.path(plot_dir, "Trajectory", "pseudotime.png"), plot = pseudo, width = 12, height = 12, dpi = 300)
+ggsave(filename = file.path(plot_dir, "Trajectory", "pseudotime2.png"), plot = condition, width = 12, height = 12, dpi = 300)
+ggsave(filename =  file.path(plot_dir, "Trajectory", "density.png"), plot = density, width = 12, height = 12, dpi = 300)
+ggsave(filename = file.path(plot_dir, "Trajectory", "bar.png"), plot = bar, width = 12, height = 12, dpi = 300)
+
+```
+
+## Monocle 
+```{r}
+
+```
+
+## Cell cyle socre
+```{r}
+
+```
 
 # DEG
 ```{r [O] DEG, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
