@@ -1,5 +1,5 @@
 # read this function with
-# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07__clustering.R')
+# source('~/SLC35A2_Olig2cKO_snRNA/WIP/SCRIPTS/SourceCode/07__clustering_oligsub.R')
 
 #' Process integrated Seurat object (PCA, clustering, markers, UMAP/TSNE)
 #'
@@ -22,6 +22,7 @@ clustering <- function(
         range_end = 1.2,
         range_step = 0.1,
         save = TRUE,
+        suffix = NULL,
         qsave_dir = NULL,
         markers_dir = NULL) {
     # Save check
@@ -30,10 +31,10 @@ clustering <- function(
         if (!dir.exists(qsave_dir)) {dir.create(qsave_dir, recursive = TRUE)}
         if (!dir.exists(markers_dir)) {dir.create(markers_dir, recursive = TRUE)}
     }
-
+    
     # Process
     Seurat::DefaultAssay(integrated_rna) <- 'integrated'
-
+    
     # Clustering
     cluster_range = seq(range_start, range_end, by = range_step)
     for (i in cluster_range) {
@@ -41,9 +42,9 @@ clustering <- function(
             integrated_rna,
             graph.name = 'snn',
             resolution = i,
-            cluster.name = paste0("RNA_cluster_", i))
+            cluster.name = paste0("RNA_cluster", suffix, "_", i))
     }
-
+    
     # Find markers
     # The "SCT" assay contains normalized and variance-stabilized data suitable for identifying differentially expressed genes between clusters.
     # The "integrated" assay is batch-corrected for alignment and not designed for marker detection as it may suppress biological variation in favor of alignment.
@@ -52,7 +53,7 @@ clustering <- function(
     # logfc.threshold: Minimum log fold-change required to call a feature significant.
     markers <- list()
     for (i in cluster_range) {
-        cluster <- paste0('RNA_cluster_', i)
+        cluster <- paste0('Olig_cluster', suffix, "_", i)
         Seurat::Idents(integrated_rna) <- integrated_rna[[cluster]][,1]
         markers[[cluster]] <- Seurat::FindAllMarkers(
             integrated_rna,
@@ -62,14 +63,14 @@ clustering <- function(
             min.pct = 0.25,
             logfc.threshold = 0.25)
     }
-
+    
     # Save object
-    if (save) {qs::qsave(integrated_rna, file = file.path(qsave_dir, "07_clustered.qs"))
-        message('Saved processed integraed rna objec to ', file.path(qsave_dir, "07_clustered.qs"))
-
+    if (save) {qs::qsave(integrated_rna, file = file.path(qsave_dir, paste0("07__clustered", suffix, ".qs")))
+        message('Saved processed integraed rna objec to ', file.path(qsave_dir, paste0("07__clustered", suffix, ".qs")))
+        
         for (name in names(markers)) {
-            write.csv(markers[[name]], file = file.path(markers_dir, paste0(name, "_markers.csv")))
-            message('Saved processed markers to ', file.path(markers_dir, paste0(name, "_markers.csv")))
+            write.csv(markers[[name]], file = file.path(markers_dir, paste0(name, "_markers", ".csv")))
+            message('Saved processed markers to ', file.path(markers_dir, paste0(name, "_markers", ".csv")))
         }
     }
     return(integrated_rna)

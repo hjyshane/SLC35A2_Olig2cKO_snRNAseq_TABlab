@@ -71,7 +71,7 @@ options(future.globals.maxSize = 16000 * 1024^2)
 # Load custom function scripts
 source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/01__load_rna_from_h5.R")
 source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/02__create_seurat_object.R")
-source("~/SLC35A2_Olig2cKO_snRNA_JY_JY/WIP/SCRIPTS/SourceCode/03__rna_qc.R")
+source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/03__rna_qc.R")
 source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/04__process_rna.R')
 source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration.R')
 source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/06__process_integrated.R')
@@ -153,7 +153,7 @@ rna_list <-
 
 # Save
 qs::qsave(rna_list, 
-          file = "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/QSAVE/01_rna_list.qs")
+          file = "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/QSAVE/01__rna_list.qs")
 
 ```
 
@@ -162,7 +162,7 @@ qs::qsave(rna_list,
 # source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/02__create_seurat_object.R")
 
 # load previous object if needed
-# rna_list <- qs::qread("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/QSAVE/01_rna_list.qs")
+# rna_list <- qs::qread("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/QSAVE/01__rna_list.qs")
 
 seurat_list <- 
   create_seurat_object.R(rna_list,
@@ -181,7 +181,7 @@ seurat_list <-
 
 # Save
 qs::qsave(seurat_list, 
-          file = file.path(qsave_dir, "02_rna_list_seurat.qs"))
+          file = file.path(qsave_dir, "002__rna_list_seurat.qs"))
 ```
 
 ## Initial Vizualization
@@ -280,7 +280,7 @@ QC_test <- qc_threshold(seurat_list = seurat_list,
 # source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/03__rna_qc.R")
 
 # load previous object if needed
-# seurat_list <- qs::qread("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/QSAVE/02_rna_list_seurat.qs")
+# seurat_list <- qs::qread("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/QSAVE/002__rna_list_seurat.qs")
 
 # Filter the cells
 filtered_list <- rna_qc(
@@ -299,7 +299,7 @@ QC_summary <- read_csv("WIP/QC/QC_summary.csv")
 
 # Save
 qs::qsave(filtered_list, 
-          file = file.path(qsave_dir, "03_filtered_rna_list.qs"))
+          file = file.path(qsave_dir, "03__filtered_rna_list.qs"))
 
 ```
 
@@ -308,7 +308,7 @@ qs::qsave(filtered_list,
 # source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/04__process_rna.R")
 
 # Read previous object if needed.
-# filtered_list <- qs::qread(file.path(qsave_dir, "03_filtered_rna_list.qs"))
+# filtered_list <- qs::qread(file.path(qsave_dir, "03__filtered_rna_list.qs"))
 
 # Normalization, SCTrancform, PCA and UMAP/TSNE
 processed_list <- process_rna(
@@ -318,7 +318,7 @@ processed_list <- process_rna(
 
 # Save
 qs::qsave(processed_list, 
-          file = file.path(qsave_dir, '04_processed_rna_list.qs'))
+          file = file.path(qsave_dir, '04__processed_rna_list'))
 ```
 
 # Integration
@@ -330,7 +330,7 @@ Integration with SCT can't cover the number of cells in our object so trying RPC
 # source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration.R')
 
 # Read previous object if needed.
-# processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list.qs"))
+# processed_list <- qs::qread(file.path(qsave_dir, "04__processed_rna_list"))
 
 # Integration
 integrated <- rpca_integration(processed_list, 
@@ -345,12 +345,13 @@ integrated <- rpca_integration(processed_list,
 # source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/06__process_integrated.R')
 
 # Read previous object if needed.
-# integrated <- qs::qread(file.path(qsave_dir, "05_integrated_rna.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "05__integrated_rna.qs"))
 
 # Process integrated object
 integrated <- process_integrated(integrated,
                                  save = TRUE,
-                                 qsave_dir = qsave_dir)
+                                 save_dir = qsave_dir,
+                                 )
 
 ```
 
@@ -361,16 +362,16 @@ Seurat::DefaultAssay(integrated) <- "RNA"
 Seurat::Idents(integrated) <- "MouseID"
 
 # DimPLot
-dp <- Seurat::DimPlot(integrated, reduction = 'umap', group.by = 'Timepoint', alpha = 0.3) |
-  Seurat::DimPlot(integrated, reduction = 'umap', group.by = 'Genotype', alpha = 0.3) |
+dp <- Seurat::DimPlot(integrated, reduction = 'umap', group.by = 'TimePoint', alpha = 0.3) |
+  Seurat::DimPlot(integrated, reduction = 'umap', group.by = 'GenoType', alpha = 0.3) |
   Seurat::DimPlot(integrated, reduction = 'umap', group.by = "MouseID", alpha = 0.3) |
   Seurat::DimPlot(integrated, reduction = 'umap', group.by = "SampleID", alpha = 0.3)
 
 # Save
 ggplot2::ggsave(filename = file.path(plot_dir, "DimPlot_umap_initial_all.png"), dp, width = 18, height = 4, dpi = 300)
 
-Seurat::DimPlot(integrated, reduction = 'umap', split.by = 'Timepoint', alpha = 0.3)
-Seurat::DimPlot(integrated, reduction = 'umap', split.by = 'Genotype', alpha = 0.3)
+Seurat::DimPlot(integrated, reduction = 'umap', split.by = 'TimePoint', alpha = 0.3)
+Seurat::DimPlot(integrated, reduction = 'umap', split.by = 'GenoType', alpha = 0.3)
 Seurat::DimPlot(integrated, reduction = 'umap', split.by = "MouseID", alpha = 0.3)
 Seurat::DimPlot(integrated, reduction = 'umap', split.by = "SampleID", alpha = 0.3)
 ```
@@ -380,7 +381,7 @@ Seurat::DimPlot(integrated, reduction = 'umap', split.by = "SampleID", alpha = 0
 # source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07__clustering.R')
 
 # Read previous object if needed.
-# integrated <- qs::qread(file.path(qsave_dir, "06_integrated_rna.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "06__integrated_rna.qs"))
 
 integrated <- clustering(integrated,
                          range_start = 0.4,
@@ -412,15 +413,16 @@ Seurat::DefaultAssay(integrated) <- "RNA"
 integrated <- SeuratObject::JoinLayers(integrated)
 
 # Save
-qs::qsave(integrated, file = file.path(qsave_dir, "08_clustered_metadata_added.qs"))
+qs::qsave(integrated, file = file.path(qsave_dir, "08__clustered_metadata_added.qs"))
 ```
 
+# Cell type annotation
 ## Use Mousebrain.org object as reference for cell typing. Using Jesse's custom object.
 ```{r [O] Cell type, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/08_ref_mousebrain_annotation.R')
 
 # Read previous object if needed.
-# integrated <- qs::qread(file.path(qsave_dir, "08_clustered_metadata_added.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "08__clustered_metadata_added.qs"))
 
 # Read reference object for cell typing
 ref_obj <- readRDS("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/mouseatlas_cut_processed.rds")
@@ -434,15 +436,12 @@ integrated <- ref_mousebrain_annotation(ref_obj,
                                         save = T,
                                         save_dir = qsave_dir)
 
-# Also, cleaned out metadata. all prediction score were deleted.
-# #  all prediction score were deleted.
-integrated@meta.data <- integrated@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated@meta.data))]
-
 ```
 
+## Clean
 ```{r [O] Clean ref annotation, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
-# integrated <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "09__ref_annotated_obj.qs"))
 
 # Ref cell type prediction will be stored in oligsub_man2$predicted.id.
 Seurat::Idents(integrated) <- integrated$predicted.id
@@ -471,9 +470,13 @@ integrated$ref_short <- shortened(integrated$predicted.id)
 Seurat::Idents(integrated) <- "ref_short"
 dp_ref <- Seurat::DimPlot(integrated, reduction = "umap", label = T, repel = T) + Seurat::NoLegend()
 
+# Also, cleaned out metadata. all prediction score were deleted.
+# #  all prediction score were deleted.
+integrated@meta.data <- integrated@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated@meta.data))]
+
 # Save
 ggplot2::ggsave(dp_ref, file = file.path(plot_dir, "DimPlot_mousebrain_ref.png"), width = 8, height = 8, dpi = 300)
-qs::qsave(integrated, file = file.path(qsave_dir, "09_ref_annotated_obj.qs"))
+qs::qsave(integrated, file = file.path(qsave_dir, "09__ref_annotated_obj.qs"))
 ```
 
 ## Milo try
@@ -495,43 +498,10 @@ Seurat::Idents(integrated) <- "CellTypes"
 Seurat::DimPlot(integrated, reduction = "umap", label = TRUE, repel = TRUE) + Seurat::NoLegend()
 ```
 
-## SLC35A2 exrpression check
-```{r [V] Check SLC35A2 expression, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Assay and idents set
-Seurat::DefaultAssay(integrated) <- "SCT"
-Seurat::Idents(integrated) <- "ref_short"
-
-# Looking only Olig cells
-oligsub <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
-oligsub$ref_short <- factor(oligsub$ref_short, levels = c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
-
-# Assay and idents set
-Seurat::DefaultAssay(oligsub) <- "SCT"
-Seurat::Idents(oligsub) <- "MouseID"
-
-# Visualize
-SeuratExtend::VlnPlot2(oligsub, features = "Slc35a2",show.mean = F, pt = F, box = F)
-Seurat::FeaturePlot(integrated, features = "Slc35a2", label = F, repel = T, split.by = "TimeGeno")
-
-# Save for refrence
-ggplot2::ggsave(slc35a2, file = file.path(plot_dir, "Feature_slc35a2.png"), width = 32, height = 8, dpi = 300)
-
-# Slc35a2 expression doesn't seem to be reduced in cKO cells. it might be due to ambient RNA from dissociateion/library prep. Plan to implement SoupX (Tracy will provide the script to start). Then I can compare once again. 
-# SoupX didn't change much.
-## Nuclear RNA only, 
-```
-
-## Cell count check
-```{r [S] Cell count Summary, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-## "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/99_CellCount_Slc35a2Check.R"
-# Done cell count summary, Slc35a2 expressing cell check
-# plot save in "./WIP/Plots/Cell_counts
-```
-
 ## Visualize Cell tyep markers
 ```{r [V]] DotPlot, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
-# integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "10__metadata_edited_obj.qs"))
 
 # cell type vectors
 ct <- c('Astrocytes', 'Microglia', 'Ependymal', 'ExN', 'InhN', 'NPC', 'OPC_1', 'OPC_2', 'COP/NFOL', 'MFOL', 'Mature_OL', 'Pericytes', 'Vascular')
@@ -589,12 +559,45 @@ ggplot2::ggsave(dp, filename = file.path(plot_dir, "DotPlot_CellMarkers.png"), w
 ggplot2::ggsave(dimp, filename = file.path(plot_dir, "DimPlot_CellType.png"), width = 7, height = 7, dpi = 300)
 ```
 
+# SLC35A2 expression check
+```{r [V] Check SLC35A2 expression, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Assay and idents set
+Seurat::DefaultAssay(integrated) <- "SCT"
+Seurat::Idents(integrated) <- "ref_short"
+
+# Looking only Olig cells
+oligsub <- subset(integrated, integrated$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
+oligsub$ref_short <- factor(oligsub$ref_short, levels = c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
+
+# Assay and idents set
+Seurat::DefaultAssay(oligsub) <- "SCT"
+Seurat::Idents(oligsub) <- "MouseID"
+
+# Visualize
+SeuratExtend::VlnPlot2(oligsub, features = "Slc35a2",show.mean = F, pt = F, box = F)
+Seurat::FeaturePlot(integrated, features = "Slc35a2", label = F, repel = T, split.by = "TimeGeno")
+
+# Save for refrence
+ggplot2::ggsave(slc35a2, file = file.path(plot_dir, "Feature_slc35a2.png"), width = 32, height = 8, dpi = 300)
+
+# Slc35a2 expression doesn't seem to be reduced in cKO cells. it might be due to ambient RNA from dissociateion/library prep. Plan to implement SoupX (Tracy will provide the script to start). Then I can compare once again. 
+# SoupX didn't change much.
+## Nuclear RNA only, 
+```
+
+# Cell count check
+```{r [S] Cell count Summary, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+## "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/99_CellCount_Slc35a2Check.R"
+# Done cell count summary, Slc35a2 expressing cell check
+# plot save in "./WIP/Plots/Cell_counts
+```
+
 # Doublet process
 ## Prepare list of objects.
 ```{r [O] Add cluster info to individual object, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
-# integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
-# processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "10__metadata_edited_obj.qs"))
+# processed_list <- qs::qread(file.path(qsave_dir, "04__processed_rna_list"))
 
 # Transfer cluster identity
 meta <- integrated@meta.data %>%
@@ -622,7 +625,7 @@ qs::qsave(processed_list, file = file.path(qsave_dir, "04_processed_rna_list_id.
 # Run doubletfinder
 # Read previous object
 # processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list_id.qs"))
-# integrated <- qs::qread(file.path(qsave_dir, "10_metadata_edited_obj.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "10__metadata_edited_obj.qs"))
 
 # Run
 processed_list <- find_dbl(processed_list, save = TRUE, save_dir = qsave_dir)
@@ -651,13 +654,13 @@ integrated_meta <- integrated@meta.data %>%
 integrated@meta.data <- integrated_meta
 
 # save
-qs::qsave(integrated, file = file.path(qsave_dir, "11_dbl_added.qs"))
+qs::qsave(integrated, file = file.path(qsave_dir, "11__dbl_added.qs"))
 ```
 
 ### Doublet counts
 ```{r [S] Doublet Stats, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
-# integrated <- qs::qread(file.path(qsave_dir, "11_dbl_added.qs"))
+# integrated <- qs::qread(file.path(qsave_dir, "11__dbl_added.qs"))
 doublet_ratio <- round(table(integrated$Doublet_Status)[[1]]/table(integrated$Doublet_Status)[[2]],3)
 
 doublet_grouped <- integrated@meta.data %>%
@@ -665,49 +668,47 @@ doublet_grouped <- integrated@meta.data %>%
   count(Doublet_Status)
 ```
 
-# Proper subset and integration process
+# Olig subset
+Proper subset and integration process
 ## Subset
 ```{r [O] Subset Olig, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object
 processed_list <- qs::qread(file.path(qsave_dir, "04_processed_rna_list_dbl.qs"))
-
-# subset function
-subset_by_types <- function(obj, meta_col, keep_levels) {
-  sample <- obj[[]]
-  if (!meta_col %in% colnames(sample)) {
-    warning(sprintf("meta column '%s' not found; returning NULL", meta_col))
-    return(NULL)
-  }
-  keep_cells <- rownames(sample)[sample[[meta_col]] %in% keep_levels]
-  if (length(keep_cells) == 0) return(NULL) 
-  subset(obj, cells = keep_cells)
-}
+# integrated <- qs::qread(file.path(qsave_dir, "11__dbl_added.qs"))
 
 # Cell clusters
-oligos <- c("OPC", "COP", "NFOL", "MFOL", "Mature_OL")
+oligos <- c("OPC_1", "OPC_2", "COP/NFOL", "MFOL", "Mature_OL")
 oligos_npc <- c(oligos, "NPC")
 
-# manual
-processed_list_man <- lapply(processed_list, subset_by_types, meta_col = "CellTypes", keep_levels = oligos)
-processed_list_man <- Filter(Negate(is.null), processed_list_man)
+# Subset based on manual
+processed_list_man <- processed_list
+for (i in seq_along(processed_list_man)) {
+  processed_list_man[[i]] <- subset(processed_list_man[[i]], processed_list_man[[i]]$CellTypes %in% oligos)
+}
 
-# ref
-processed_list_ref <- lapply(processed_list, subset_by_types, meta_col = "ref_short", keep_levels = oligos)
-processed_list_ref <- Filter(Negate(is.null), processed_list_ref)
+# Subset based on manual
+processed_list_ref <- processed_list
+for (i in seq_along(processed_list_man)) {
+ processed_list_ref[[i]] <- subset(processed_list_man[[i]], processed_list_man[[i]]$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL"))
+}
 
-# manual and NPC
-processed_list_man_npc <- lapply(processed_list, subset_by_types, meta_col = "CellTypes", keep_levels = oligos_npc)
-processed_list_man_npc <- Filter(Negate(is.null), processed_list_man_npc)
+# Subset based on manual
+processed_list_man_npc <- processed_list
+for (i in seq_along(processed_list_man_npc)) {
+  processed_list_man_npc[[i]] <- subset(processed_list_man_npc[[i]], processed_list_man_npc[[i]]$CellTypes %in% oligos_npc)
+}
 
-# ref and NPC
-processed_list_ref_npc <- lapply(processed_list, subset_by_types, meta_col = "ref_short", keep_levels = oligos_npc)
-processed_list_ref_npc <- Filter(Negate(is.null), processed_list_ref_npc)
+# Subset based on manual
+processed_list_ref_npc <- processed_list
+for (i in seq_along(processed_list_ref_npc)) {
+ processed_list_ref_npc[[i]] <- subset(processed_list_ref_npc[[i]], processed_list_ref_npc[[i]]$ref_short %in% c("OPC", "COP", "NFOL", "MFOL", "Mature_OL", "NPC"))
+}
 
 # Save
-qs::qsave(processed_list_ref, file = file.path(qsave_dir, "04_processed_rna_list_subset_ref.qs"))
-qs::qsave(processed_list_man, file = file.path(qsave_dir, "04_processed_rna_list_subset_man.qs"))
-qs::qsave(processed_list_ref_npc, file = file.path(qsave_dir, "04_processed_rna_list_subset_ref_npc.qs"))
-qs::qsave(processed_list_man_npc, file = file.path(qsave_dir, "04_processed_rna_list_subset_man_npc.qs"))
+qs::qsave(processed_list_ref, file = file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_ref.qs"))
+qs::qsave(processed_list_man, file = file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_man.qs"))
+qs::qsave(processed_list_ref_npc, file = file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_ref_npc.qs"))
+qs::qsave(processed_list_man_npc, file = file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_man_npc.qs"))
 ```
 
 ## Integration
@@ -715,33 +716,39 @@ qs::qsave(processed_list_man_npc, file = file.path(qsave_dir, "04_processed_rna_
 Integration with SCT can't cover the number of cells in our object so trying RPCA method in next section
 ```{r [O] Integrate RNA objects with RPCA, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # source code changed for RunPCA due to low cell number in ref obj (P07b has 49 cells). default npcs are 50 and errored out so changed npcs to 48.
-# source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration_npc48.R")
+# source("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/05__rpca_rna_integration.R")
 
 # Read previous object if needed.
-# processed_list_ref <- qs::qread(file.path(qsave_dir, "04_processed_rna_list_subset_ref.qs"))
-# processed_list_man <- qs::qread(file.path(qsave_dir, "04_processed_rna_list_subset_man.qs"))
-# processed_list_ref_npc <- qs::qread(file.path(qsave_dir, "04_processed_rna_list_subset_ref_npc.qs"))
-# processed_list_man_npc <- qs::qread(file.path(qsave_dir, "04_processed_rna_list_subset_man_npc.qs"))
+# processed_list_ref <- qs::qread(file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_ref.qs"))
+# processed_list_man <- qs::qread(file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_man.qs"))
+# processed_list_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_ref_npc.qs"))
+# processed_list_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "04__processed_rna_list_subset_man_npc.qs"))
 
 # Integration
 integrated_ref <- rpca_integration(processed_list_ref, 
-                               save = F)
+                               save = T,
+                               suffix = "_ref",
+                               npc = 48,
+                               save_dir = file.path(qsave_dir, "OligoSubset"))
 
 integrated_man <- rpca_integration(processed_list_man, 
-                               save = F)
+                               save = T,
+                               suffix = "_man",
+                               npc = 48,
+                               save_dir = file.path(qsave_dir, "OligoSubset"))
 
 integrated_ref_npc <- rpca_integration(processed_list_ref_npc, 
-                               save = F)
+                               save = T,
+                               suffix = "_ref_npc",
+                               npc = 48,
+                               save_dir = file.path(qsave_dir, "OligoSubset"))
 
 integrated_man_npc <- rpca_integration(processed_list_man_npc, 
-                               save = F)
+                               save = T,
+                               suffix = "_man_npc",
+                               npc = 48,
+                               save_dir = file.path(qsave_dir, "OligoSubset"))
 
-
-# Save
-qs::qsave(integrated_ref, file = file.path(qsave_dir, "05_integrated_subset_ref.qs"))
-qs::qsave(integrated_man, file = file.path(qsave_dir, "05_integrated_subset_man.qs"))
-qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "05_integrated_subset_ref_npc.qs"))
-qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "05_integrated_subset_man_npc.qs"))
 ```
 
 ## Process Integrated object
@@ -750,28 +757,99 @@ qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "05_integrated_subset_
 # source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/06__process_integrated.R')
 
 # Read previous object if needed.
-# integrated_ref <- qs::qread(file.path(qsave_dir, "05_integrated_subset_ref.qs"))
-# integrated_man <- qs::qread(file.path(qsave_dir, "05_integrated_subset_man.qs"))
-# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "05_integrated_subset_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "05_integrated_subset_man_npc.qs"))
+# integrated_ref <- qs::qread(file.path(qsave_dir, "OligoSubset", "05__integrated_ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "OligoSubset", "05__integrated__man.qs"))
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "05__integrated_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "05__integrated_man_npc.qs"))
 
 # Process integrated object
 integrated_ref <- process_integrated(integrated_ref,
-                                 save = F)
+                                 save = T,
+                                 suffix = "_ref",
+                                 save_dir = file.path(qsave_dir, "OligoSubset"))
+
 integrated_man <- process_integrated(integrated_man, 
-                               save = F)
+                               save = T,
+                               suffix = "_man",
+                               save_dir = file.path(qsave_dir, "OligoSubset"))
+
 integrated_ref_npc <- process_integrated(integrated_ref_npc,
-                                 save = F)
+                                 save = T,
+                                 suffix = "_man_npc",
+                                 save_dir = file.path(qsave_dir, "OligoSubset"))
+
 integrated_man_npc <- process_integrated(integrated_man_npc, 
-                               save = F)
-# Save
-qs::qsave(integrated_ref, file = file.path(qsave_dir, "06_integrated_subset_ref.qs"))
-qs::qsave(integrated_man, file = file.path(qsave_dir, "06_integrated_subset_man.qs"))
-qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "06_integrated_subset_ref_npc.qs"))
-qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "06_integrated_subset_man_npc.qs"))
+                               save = T,
+                               suffix = "_ref_npc",
+                               save_dir = file.path(qsave_dir, "OligoSubset"))
+
 ```
 
-### Initial visualization - DimPlot
+## Cluster and Markers, additional meta data
+```{r [O] Clusteriazation, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Change save name in source code!!
+# source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07__clustering.R')
+
+# Read previous object if needed.
+# integrated_ref <- qs::qread(file.path(qsave_dir, "OligoSubset", "06__integrated_ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "OligoSubset", "06__integrated_man.qs"))
+# integrated_ref_npc<- qs::qread(file.path(qsave_dir, "OligoSubset", "06__integrated_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "06__integrated_man_npc.qs"))
+
+# Join layers after integration in RNA assay
+Seurat::DefaultAssay(integrated_man) <- "RNA"
+integrated_man <- SeuratObject::JoinLayers(integrated_man)
+
+integrated_man <- clustering(integrated_man,
+                         range_start = 0.4,
+                         range_end = 1.2,
+                         range_step = 0.1,
+                         save = TRUE,
+                         suffix = "_man",
+                         qsave_dir = file.path(qsave_dir, "OligoSubset"),
+                         markers_dir = file.path(csv_dir, "Markers_OligoSubset"))
+
+
+# Join layers after integration in RNA assay
+Seurat::DefaultAssay(integrated_ref) <- "RNA"
+integrated_ref <- SeuratObject::JoinLayers(integrated_ref)
+
+integrated_ref <- clustering(integrated_ref,
+                         range_start = 0.4,
+                         range_end = 1.2,
+                         range_step = 0.1,
+                         save = TRUE,
+                         suffix = "_ref",
+                         qsave_dir = file.path(qsave_dir, "OligoSubset"),
+                         markers_dir = file.path(csv_dir, "Markers_OligoSubset"))
+
+# Join layers after integration in RNA assay
+Seurat::DefaultAssay(integrated_man_npc) <- "RNA"
+integrated_man_npc <- SeuratObject::JoinLayers(integrated_man_npc)
+
+integrated_man_npc <- clustering(integrated_man_npc,
+                         range_start = 0.4,
+                         range_end = 1.2,
+                         range_step = 0.1,
+                         save = TRUE,
+                         suffix = "_man_npc",
+                         qsave_dir = file.path(qsave_dir, "OligoSubset"),
+                         markers_dir = file.path(csv_dir, "Markers_OligoSubset"))
+
+# Join layers after integration in RNA assay
+Seurat::DefaultAssay(integrated_ref_npc) <- "RNA"
+integrated_ref_npc <- SeuratObject::JoinLayers(integrated_ref_npc)
+
+integrated_ref_npc <- clustering(integrated_ref_npc,
+                         range_start = 0.4,
+                         range_end = 1.2,
+                         range_step = 0.1,
+                         save = TRUE,
+                         suffix = "_ref_npc",
+                         qsave_dir = file.path(qsave_dir, "OligoSubset"),
+                         markers_dir = file.path(csv_dir, "Markers_OligoSubset"))
+```
+
 ```{r [O] Add metadata, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Additional meta data
 # Forgot to add this early in the process so adding now.
@@ -787,7 +865,7 @@ integrated_ref@meta.data <- integrated_ref@meta.data %>%
   )
 
 # Add additional meta data combine age and genotype
-iintegrated_ref@meta.data$TimeGeno <- paste0(integrated_ref@meta.data$TimePoint, "_", iintegrated_ref@meta.data$GenoType)
+integrated_ref@meta.data$TimeGeno <- paste0(integrated_ref@meta.data$TimePoint, "_", iintegrated_ref@meta.data$GenoType)
 
 
 # Add to metadata
@@ -821,13 +899,21 @@ integrated_man_npc@meta.data <- integrated_man_npc@meta.data %>%
 integrated_man_npc@meta.data$TimeGeno <- paste0(integrated_man_npc@meta.data$TimePoint, "_", integrated_man_npc@meta.data$GenoType)
 
 # Save
-qs::qsave(integrated_ref, file = file.path(qsave_dir, "06_integrated_subset_ref.qs"))
-qs::qsave(integrated_man, file = file.path(qsave_dir, "06_integrated_subset_man.qs"))
-qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "06_integrated_subset_ref_npc.qs"))
-qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "06_integrated_subset_man_npc.qs"))
+qs::qsave(integrated_ref, file = file.path(qsave_dir, "OligoSubset", "08__clustered_ref.qs"))
+qs::qsave(integrated_man, file = file.path(qsave_dir, "OligoSubset", "08__clustered_man.qs"))
+qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "OligoSubset", "08__clustered_ref_npc.qs"))
+qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "OligoSubset", "08__clustered_man_npc.qs"))
 ```
 
-```{r [V] Initial DimPlot after integration, message=TRUE, warning=TRUE, paged.print=TRUE}
+### Initial visualization - DimPlot
+
+```{r [V] Initial DimPlot glimpse, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref <- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_man.qs"))
+# integrated_ref_npc<- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_man_npc.qs"))
+
 # set assay and Idents
 Seurat::DefaultAssay(iintegrated_ref) <- "RNA"
 Seurat::Idents(iintegrated_ref) <- "MouseID"
@@ -881,74 +967,7 @@ Seurat::DimPlot(integrated_man_npc, reduction = 'umap', split.by = 'TimePoint', 
 Seurat::DimPlot(integrated_man_npc, reduction = 'umap', split.by = 'GenoType', alpha = 0.3)
 Seurat::DimPlot(integrated_man_npc, reduction = 'umap', split.by = "MouseID", alpha = 0.3)
 Seurat::DimPlot(integrated_man_npc, reduction = 'umap', split.by = "SampleID", alpha = 0.3)
-```
 
-## Cluster and Markers, additional meta data
-```{r [O] Clusteriazation, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Change save name in source code!!
-# source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/07_clustering_oligsub.R')
-
-# Read previous object if needed.
-# integrated_ref <- qs::qread(file.path(qsave_dir, "06_integrated_subset_ref.qs"))
-# integrated_man <- qs::qread(file.path(qsave_dir, "06_integrated_subset_man.qs"))
-# integrated_ref_npc<- qs::qread(file.path(qsave_dir, "06_integrated_subset_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "06_integrated_subset_man_npc.qs"))
-
-# Join layers after integration in RNA assay
-Seurat::DefaultAssay(integrated_man) <- "RNA"
-integrated_man <- SeuratObject::JoinLayers(integrated_man)
-
-integrated_man <- clustering_oligsub(integrated_man,
-                         range_start = 0.4,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_man",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
-
-
-# Join layers after integration in RNA assay
-Seurat::DefaultAssay(integrated_ref) <- "RNA"
-integrated_ref <- SeuratObject::JoinLayers(integrated_ref)
-
-integrated_ref <- clustering_oligsub(integrated_ref,
-                         range_start = 0.4,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_ref",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
-
-# Join layers after integration in RNA assay
-Seurat::DefaultAssay(integrated_man_npc) <- "RNA"
-integrated_man_npc <- SeuratObject::JoinLayers(integrated_man_npc)
-
-integrated_man_npc <- clustering_oligsub(integrated_man_npc,
-                         range_start = 0.4,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_man_npc",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
-
-# Join layers after integration in RNA assay
-Seurat::DefaultAssay(integrated_ref_npc) <- "RNA"
-integrated_ref_npc <- SeuratObject::JoinLayers(integrated_ref_npc)
-
-integrated_ref_npc <- clustering_oligsub(integrated_ref_npc,
-                         range_start = 0.4,
-                         range_end = 1.2,
-                         range_step = 0.1,
-                         save = TRUE,
-                         suffix = "_ref_npc",
-                         qsave_dir = qsave_dir,
-                         markers_dir = file.path(csv_dir, "Markers"))
-```
-
-```{r [V] Glimpse, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 ref <- Seurat::DimPlot(integrated_ref_npc, reduction = 'umap', split.by = 'GenoType', alpha = 0.3, group.by = "ref_short", label = T, repel = T) + NoLegend() + ggtitle("ref") |
 Seurat::DimPlot(integrated_ref_npc, reduction = 'umap', split.by = 'GenoType', alpha = 0.3, group.by = "CellTypes", label = T, repel = T) + NoLegend() + ggtitle("manual")
 
@@ -958,16 +977,16 @@ Seurat::DimPlot(integrated_man_npc, reduction = 'umap', split.by = 'GenoType', a
 ref / man
 ```
 
-
-## Use Mousebrain.org object as reference for cell typing. Using Jesse's custom object.
+## Cell type annotation
+Use Mousebrain.org object as reference for cell typing. Using Jesse's custom object.
 ```{r [O] Cell type, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/08_ref_mousebrain_annotation.R')
+source('~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/08__ref_mousebrain_annotation.R')
 
 # Read previous object if needed.
-# integrated_ref <- qs::qread(file.path(qsave_dir, "08_clustered_ref.qs"))
-# integrated_man <- qs::qread(file.path(qsave_dir, "08_clustered_man.qs"))
-# integrated_ref_npc<- qs::qread(file.path(qsave_dir, "08_clustered_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "08_clustered_man_npc.qs"))
+# integrated_ref <- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_man.qs"))
+# integrated_ref_npc<- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "08__clustered_man_npc.qs"))
 
 # Read reference object for cell typing
 ref_obj <- readRDS("~/SLC35A2_Olig2cKO_snRNA_JY/WIP/mouseatlas_cut_processed.rds")
@@ -982,7 +1001,7 @@ integrated_ref <- ref_mousebrain_annotation(ref_obj,
                                         integrated_ref,
                                         save = T,
                                         suffix = "_ref",
-                                        save_dir = qsave_dir
+                                        save_dir = file.path(qsave_dir, "OligoSubset")
                                         )
 
 # run mouse annotation
@@ -990,7 +1009,7 @@ integrated_man <- ref_mousebrain_annotation(ref_obj,
                                         integrated_man,
                                         save = T,
                                         suffix = "_man",
-                                        save_dir = qsave_dir
+                                        save_dir = file.path(qsave_dir, "OligoSubset")
                                         )
 
 # run mouse annotation
@@ -998,7 +1017,7 @@ integrated_ref_npc <- ref_mousebrain_annotation(ref_obj,
                                         integrated_ref_npc,
                                         save = T,
                                         suffix = "_ref_npc",
-                                        save_dir = qsave_dir
+                                        save_dir = file.path(qsave_dir, "OligoSubset")
                                         )
 
 # run mouse annotation
@@ -1006,16 +1025,17 @@ integrated_man_npc <- ref_mousebrain_annotation(ref_obj,
                                         integrated_man_npc,
                                         save = T,
                                         suffix = "_man_npc",
-                                        save_dir = qsave_dir
+                                        save_dir = file.path(qsave_dir, "OligoSubset")
                                         )
 ```
+
 ### Metadata cleaning
 ```{r [O] Clean out metadata., echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
-# integrated_ref <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_ref.qs"))
-# integrated_man <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_man.qs"))
-# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "09_ref_annotated_obj_man_npc.qs"))
+# integrated_ref <- qs::qread(file.path(qsave_dir, "OligoSubset", "09__ref_annotated_obj_ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "OligoSubset", "09__ref_annotated_obj_man.qs"))
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "09__ref_annotated_obj_ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "09__ref_annotated_obj_man_npc.qs"))
 
 #  all prediction score were deleted.
 integrated_ref@meta.data <- integrated_ref@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated_ref@meta.data))]
@@ -1027,19 +1047,19 @@ integrated_man@meta.data <- integrated_man@meta.data[, !grepl(pattern = "predict
 integrated_man_npc@meta.data <- integrated_man_npc@meta.data[, !grepl(pattern = "prediction.score", x = colnames(integrated_man_npc@meta.data))]
 
 # Save
-qs::qsave(integrated_ref, file = file.path(qsave_dir, "10_ref.qs"))
-qs::qsave(integrated_man, file = file.path(qsave_dir, "10_man.qs"))
-qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "10_ref_npc.qs"))
-qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "10_man_npc.qs"))
+qs::qsave(integrated_ref, file = file.path(qsave_dir, "OligoSubset", "10__ref.qs"))
+qs::qsave(integrated_man, file = file.path(qsave_dir, "OligoSubset", "10__man.qs"))
+qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
 ```
 
 ### Clean cluster name
 ```{r [O] Clean ref annotation, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
-# integrated_ref <- qs::qread(file.path(qsave_dir, "10_ref.qs"))
-# integrated_man <- qs::qread(file.path(qsave_dir, "10_man.qs"))
-# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "10_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "10_man_npc.qs"))
+# integrated_ref <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref.qs"))
+# integrated_man <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man.qs"))
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
 
 # Function to replace long names to short names
 shortened <- function(name) {ifelse(name %in% names(name_map), name_map[name], name)}
@@ -1058,7 +1078,7 @@ integrated_ref$ref_short2 <- shortened(integrated_ref$predicted.id)
 
 # get names and shorten them - man
 ln <- unique(integrated_man$predicted.id)
-sn <- c("ExCA3", "ExCortex", "MFOL", "Mature_OL", "OPC", "COP", "Interneuron", "NFOL", "Interneuron", "MGE", "Granule_DG", "ExCA1", "Interneuron", "Cajal_Retzius", "CGE", "NPC", "Interneuron", "Vascular", "Vascular", "Granuel_Blast_DG")
+sn <- c("ExCA3", "ExCortex", "MFOL", "Mature_OL", "OPC", "COP", "Interneuron", "NFOL", "Interneuron", "MGE", "Granule_DG", "ExCA1", "Interneuron", "Cajal_Retzius", "CGE", "NPC", "Interneuron", "Vascular", "Vascular", "Granule_Blast_DG")
 name_map <- setNames(sn, ln)
 integrated_man$ref_short2 <- shortened(integrated_man$predicted.id)
 
@@ -1086,92 +1106,166 @@ Seurat::DimPlot(integrated_man, reduction = "umap", label = T, repel = T) + Seur
 Seurat::DimPlot(integrated_ref_npc, reduction = "umap", label = T, repel = T) + Seurat::NoLegend() |
 Seurat::DimPlot(integrated_man_npc, reduction = "umap", label = T, repel = T) + Seurat::NoLegend()
 
-# Save
-qs::qsave(integrated_ref, file = file.path(qsave_dir, "10_ref.qs"))
-qs::qsave(integrated_man, file = file.path(qsave_dir, "10_man.qs"))
-qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "10_ref_npc.qs"))
-qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "10_man_npc.qs"))
-```
-
-## Visualize
-### Markers 
-```{r}
-# Read previous object if needed.
-# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "10_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "10_man_npc.qs"))
-
-# Set marker genes to plot
-markers <- c('Aqp4', 'Aldh1l1', 'Gfap', 'P2ry12', 'Aif1', 'Tmem212', 'Foxj1', 'Gad1','Gad2', 'Slc17a7', 'Nes', 'Pdgfra', 'Cspg4', 'Enpp6', 'Plp1', 'Mog', 'Vim')
 
 # Order Column
+integrated_ref$ref_short2 <- factor(integrated_ref$ref_short2, levels = c("Interneuron", "Cajal_Retzius", "ExCortex", "ExCA1", "ExCA3", "Granule_DG", "Granule_Blast_DG", "OPC", "COP", "NFOL", "MFOL", "Mature_OL", "NPC", "Vascular"))
+
+integrated_man$ref_short2 <- factor(integrated_man$ref_short2, levels = c("CGE", "MGE", "Interneuron", "Cajal_Retzius", "ExCortex", "ExCA1", "ExCA3", "Granule_DG", "Granule_Blast_DG", "OPC", "COP", "NFOL", "MFOL", "Mature_OL", "NPC", "Vascular"))
+
 integrated_ref_npc$ref_short2 <- factor(integrated_ref_npc$ref_short2, levels = c("Astrocytes", "Microglia", "Macrophages", "Interneuron", "Cajal_Retzius", "Ependymal", "RGL", "ExCortex", "ExCA1", "ExCA3", "Granule_DG", "Granule_Blast_DG", "OPC", "COP", "NFOL", "MFOL", "Mature_OL", "NPC", "Vascular"))
 
 integrated_man_npc$ref_short2 <- factor(integrated_man_npc$ref_short2, levels = c("Astrocytes", "CGE", "MGE", "Interneuron", "Cajal_Retzius", "RGL", "ExCortex", "ExCA1", "ExCA3", "Granule_DG", "Granule_Blast_DG", "OPC", "COP", "NFOL", "MFOL", "Mature_OL", "NPC", "Vascular"))
 
-# save
-qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "10_ref_npc.qs"))
-qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "10_man_npc.qs"))
+# Save
+qs::qsave(integrated_ref, file = file.path(qsave_dir, "OligoSubset", "10__ref.qs"))
+qs::qsave(integrated_man, file = file.path(qsave_dir, "OligoSubset", "10__man.qs"))
+qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+```
+
+### Cell Counts 
+```{r [O] Filter low number cell cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+
+table(integrated_ref_npc$ref_short2)
+table(integrated_ref_npc$CellTypes)
+table(integrated_man_npc$ref_short2)
+table(integrated_man_npc$CellTypes)
+```
+
+## Manual Cell type check
+```{r [V] Cell type check with marker genes, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# "~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_CellTypeWork_oligsub.R"
+Seurat::Idents(integrated_man_npc) <- "CellTypes2" 
+Seurat::DimPlot(integrated_man_npc, reduction = "umap", label = TRUE, repel = TRUE) + Seurat::NoLegend()
+
+Seurat::Idents(integrated_ref_npc) <- "CellTypes2" 
+Seurat::DimPlot(integrated_ref_npc, reduction = "umap", label = TRUE, repel = TRUE) + Seurat::NoLegend()
+```
+
+### Visualize - work with NPC included obj
+#### Markers list
+```{r Marker assign, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+
+# Set marker genes to plot
+markers <- c("Olig2", "Pdgfra", "Neu4", "Enpp6", "Mog", "Mag", "Mbp", 'P2ry12', 'Nes', 'Vim')
+OligMarkers_selected <-  c("Olig2", "Pdgfra", "Neu4", "Enpp6", "Mog", "Mag", "Mbp")
+```
+
+#### DotPlot
+```{r [V], echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+
+# Order Column
+integrated_man_npc$CellTypes <- factor(integrated_man_npc$CellTypes, levels = c("OPC_1", "OPC_2", "COP/NFOL", "MFOL", "Mature_OL", "NPC"))
+
+integrated_man_npc$CellTypes2 <- factor(integrated_man_npc$CellTypes2, levels = c("OPC_1", "OPC_2", "OPC_3", "COP/NFOL", "MFOL/Mature_OL", "NPC"))
+
+integrated_ref_npc$CellTypes <- factor(integrated_ref_npc$CellTypes, levels = c("OPC_1", "OPC_2", "COP/NFOL", "MFOL", "Mature_OL", "NPC", "Astrocytes", "Microglia", "Ependymal", "ExN", "InhN", "Pericytes", "Vascular"))
+
+integrated_ref_npc$CellTypes2 <- factor(integrated_ref_npc$CellTypes2, levels = c("OPC_1", "OPC_2", "COP", "NFOL", "MFOL", "Mature_OL", "NPC", "Microglia", "Vascular"))
+
+# Save
+qs::qsave(integrated_man_npc, file = file.path(qsave_dir, "OligoSubset", "10_man_npc.qs"))
+qs::qsave(integrated_ref_npc, file = file.path(qsave_dir, "OligoSubset", "10_ref_npc.qs"))
 
 # Create DotPlot
-Seurat::DotPlot(integrated_ref_npc, features = markers, group.by = "ref_short2",cols = c("darkgrey", "indianred1")) +
+Seurat::DotPlot(integrated_ref_npc, features = markers, group.by = "CellTypes2",cols = c("darkgrey", "indianred1")) +
   ggplot2::coord_flip() +
-  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.8, hjust = 1, size = 10), axis.text.y = ggplot2::element_text(size = 10), axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), legend.title = element_text(size = 10), legend.text = element_text(size = 8)) + ggtitle("ref based cluster subset") |
-Seurat::DotPlot(integrated_man_npc, features = markers, group.by = "ref_short2",cols = c("darkgrey", "indianred1")) +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.8, hjust = 1, size = 10), 
+                 axis.text.y = ggplot2::element_text(size = 10), 
+                 axis.title.x = ggplot2::element_blank(), 
+                 axis.title.y = ggplot2::element_blank(), 
+                 legend.title = element_text(size = 10), 
+                 legend.text = element_text(size = 8)) + 
+  ggtitle("ref based cluster subset") |
+  Seurat::DotPlot(integrated_man_npc, features = markers, group.by = "CellTypes2",cols = c("darkgrey", "indianred1")) +
   ggplot2::coord_flip() +
-  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.8, hjust = 1, size = 10), axis.text.y = ggplot2::element_text(size = 10), axis.title.x = ggplot2::element_blank(), axis.title.y = ggplot2::element_blank(), legend.title = element_text(size = 10), legend.text = element_text(size = 8)) + ggtitle("manual cluster subset")
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.8, hjust = 1, size = 10), 
+                 axis.text.y = ggplot2::element_text(size = 10), 
+                 axis.title.x = ggplot2::element_blank(), 
+                 axis.title.y = ggplot2::element_blank(), 
+                 legend.title = element_text(size = 10), 
+                 legend.text = element_text(size = 8)) + 
+  ggtitle("manual cluster subset")
 
-# DimPlot
-SeuratExtend::DimPlot2(integrated_ref_npc, reduction = 'umap', group.by = 'ref_short2', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("ref based cluster subset"))) +  
-  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
-SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'ref_short2', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual cluster subset"))) +  
-  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2")
+```
 
-SeuratExtend::DimPlot2(integrated_ref_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("ref based cluster subset"))) +  
-  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
-SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual cluster subset"))) +  
-  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2")
-
+##### FeaturePlot
+```{r [V], echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
 
 # FeaturePlot
-SeuratExtend::FeaturePlot3.grid(integrated_ref_npc, features = OligMarkers)
-SeuratExtend::FeaturePlot3.grid(integrated_ref_npc, features = OligMarkers_selected)
-Seurat::FeaturePlot(integrated_ref_npc, features = OligMarkers, label = T, repel = T)
 Seurat::FeaturePlot(integrated_ref_npc, features = OligMarkers_selected, label = T, repel = T)
-
-SeuratExtend::FeaturePlot3.grid(integrated_man_npc, features = OligMarkers)
-SeuratExtend::FeaturePlot3.grid(integrated_man_npc, features = OligMarkers_selected)
-Seurat::FeaturePlot(integrated_man_npc, features = OligMarkers, label = T, repel = T)
 Seurat::FeaturePlot(integrated_man_npc, features = OligMarkers_selected, label = T, repel = T)
 ```
-### DimPlots
-```{r}
-# Read previous object if needed.
-# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "10_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "10_man_npc.qs"))
 
-Idents(integrated_man_npc) <- "CellTypes"
+#### DimPlots
+```{r [V], echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+ 
+
+# DimPlot
+DimPlot(integrated_man_npc, reduction = "umap", label = T, repel = T, group.by = "CellTypes2") + NoLegend() + NoLegend() |
+  DimPlot(integrated_ref_npc, reduction = "umap", label = T, repel = T, group.by = "CellTypes2") + NoLegend()
+
+
+SeuratExtend::DimPlot2(integrated_ref_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, 
+                       theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("ref based cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
+SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, 
+                       theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2")
+
+SeuratExtend::DimPlot2(integrated_ref_npc, reduction = 'umap', group.by = 'CellTypes2', label = TRUE, label.size = 5, repel = TRUE, 
+                       theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("ref based cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
+SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'CellTypes2', label = TRUE, label.size = 5, repel = TRUE, 
+                       theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual cluster subset"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2")
+
+SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'CellTypes', label = TRUE, label.size = 5, repel = TRUE, 
+                       theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual based cluster subset1"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2") |
+SeuratExtend::DimPlot2(integrated_man_npc, reduction = 'umap', group.by = 'CellTypes2', label = TRUE, label.size = 5, repel = TRUE, 
+                       theme = list(Seurat::NoLegend(), Seurat::NoAxes(), ggtitle("manual cluster subset2"))) +  
+  theme_umap_arrows(x_label = "UMAP_1",y_label = "UMAP_2")
+
+```
+
+#### all
+```{r [V], echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+
+Idents(integrated_man_npc) <- "CellTypes2"
 DimPlot(integrated_man_npc, label = T, repel = T) + NoLegend()
 FeaturePlot(integrated_man_npc, features = OligMarkers_selected)
 FeaturePlot(integrated_man_npc, features = markers)
 
-Idents(integrated_ref_npc) <- "CellTypes"
+Idents(integrated_ref_npc) <- "CellTypes2"
 DimPlot(integrated_ref_npc, label = T, repel = T) + NoLegend()
 FeaturePlot(integrated_ref_npc, features = OligMarkers_selected)
-FeaturePlot(, features = markers)
-
-DimPlot(integrated_man_npc, reduction = "umap", label = T, repel = T, split.by  = "TimePoint", group.by = "GenoType") |
-DimPlot(integrated_man_npc, reduction = "pca", label = T, repel = T, group.by = "ref_short2") + NoLegend() |
-DimPlot(integrated_man_npc, reduction = "umap", label = T, repel = T, group.by = "CellTypes") + NoLegend() + NoLegend() |
-  DimPlot(integrated_ref_npc, reduction = "umap", label = T, repel = T, group.by = "CellTypes") + NoLegend() |
-  DimPlot(integrated_ref_npc, reduction = "pca", label = T, repel = T, group.by = "ref_short2") + NoLegend() |
-  DimPlot(integrated_ref_npc, reduction = "pca", label = T, repel = T, group.by = "CellTypes") + NoLegend() + NoLegend()
+FeaturePlot(integrated_ref_npc, features = markers)
 ```
 
 ### PCA visualization check
-```{r [V] PCA check }
+```{r [V] PCA check , echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
 # Read previous object if needed.
-# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "10_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "10_man_npc.qs"))
+# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__ref_npc.qs"))
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
 
 red <- integrated_man_npc[["pca"]]
 feats_used <- rownames(Loadings(integrated_man_npc, reduction = "pca"))  # pca features
@@ -1187,24 +1281,66 @@ p <- pca(mat, metadata = md, scale  = FALSE, removeVar = 0)
 
 biplot(p, showLoadings = TRUE, labSize = 5, pointSize = 5, sizeLoadingsNames = 5)
 screeplot(p, axisLabSize = 18, titleLabSize = 22) <- 
-eigencorplot(p, metavars = c('CellTypes', 'ref_short2'))
+eigencorplot(p, metavars = c('CellTypes2', 'ref_short2'))
 pairsplot(p)
 ```
 
-# Cell Counts 
-```{r [O] Filter low number cell cluster, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
-# Read previous object if needed.
-# integrated_ref_npc <- qs::qread(file.path(qsave_dir, "10_ref_npc.qs"))
-# integrated_man_npc <- qs::qread(file.path(qsave_dir, "10_man_npc.qs"))
+**"file.path(qsave_dir, "OligoSubset", "10__man_npc.qs")" is my final olig subset object
 
-table(integrated_ref_npc$ref_short2)
-table(integrated_ref_npc$CellTypes)
-table(integrated_man_npc$ref_short2)
-table(integrated_man_npc$CellTypes)
+# Olig-subsetted object
+## Cell type verification with FindMarkers
+I have odd OPC_2, OPC_3 cluster so it needed to be sorted.
+```{r Inspect markers, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}
+# Read previous object if needed.
+integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+findmarkerlist <- as.data.frame(read_csv("WIP/CSV/Markers_OligoSubset/Olig_cluster_man_npc_1.2_markers_man_npc.csv", col_select = -1))
+
+# Clean meta data little
+# integrated_man_npc$predicted.id <- NULL
+# integrated_man_npc$TimePoint <- integrated_man_npc$TimePoint
+# integrated_man_npc$GenoType <- integrated_man_npc$GenoType
+
+FilteredList <- findmarkerlist %>%
+  filter(p_val <= 0.05) %>%
+  arrange(cluster, desc(p_val_adj), avg_log2FC) %>%
+  group_by(cluster) %>%
+  top_n(10) %>%
+  arrange(cluster, desc(p_val_adj), avg_log2FC)
+
+celltype2markers <- FindAllMarkers(integrated_man_npc, 
+               assay = 'integrated',
+               slot = 'data',
+               only.pos = FALSE,
+               min.pct = 0.25,
+               logfc.threshold = 0.25,
+               test.use = 'wilcox',
+               group.by = "CellTypes2")  
+
+filtered <- celltype2markers %>%
+  filter(p_val <= 0.05) %>%
+  arrange(cluster, desc(p_val_adj), avg_log2FC) %>%
+  group_by(cluster) %>%
+  top_n(10) %>%
+  arrange(cluster, desc(p_val_adj), avg_log2FC)
 ```
 
-# Olig subset
+### Based on top 10 markers.
+#### **OPC_1**
+**-**: Zmat4 (−3.66), Zic2 (−1.01), Zic4 (−3.17), Zwilch (−1.45)
+**+**: Zfp57 (+1.26), Zkscan16 (+0.83)
+immature..?
 
+#### **OPC_2**
+**+**: Zgrf1 (+3.26), Zwilch (+2.64), Zfp57 (+0.39), Zfp941 (+0.44)
+**-**: Zfp385b (−4.72), Zic5 (−3.62)
+_Zgrf1, Zwilch_ - proliferation/mitotic 
+proliferating OPC?
+
+##### **OPC_3**
+**+**: Zmat4 (+3.67), Zic5 (+0.88), Zic2 (+0.77), Zic1 (+1.08), Zic4 (+2.16),  Zkscan16 (+1.30), Zfyve28 (+2.34), Zmym3 (+0.99)
+**-**: Zwilch (−0.77), Zgrf1 (−1.10)
+Zic family transcription factor
+differentiation/lineage commitment?
 
 # DEG
 ```{r [O] DEG, echo=TRUE, message=TRUE, warning=TRUE, paged.print=TRUE}

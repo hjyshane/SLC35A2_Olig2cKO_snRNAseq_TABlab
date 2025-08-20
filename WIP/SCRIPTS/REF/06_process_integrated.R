@@ -18,17 +18,19 @@
 #' @export
 process_integrated <- function(
     integrated_rna,
-    range_start = 0.4,
-    range_end = 1.2,
-    range_step = 0.1,
+    # range_start = 0.4,
+    # range_end = 1.2,
+    # range_step = 0.1,
     save = TRUE,
-    qsave_dir = NULL,
-    markers_dir = NULL) {
+    suffix = NULL,
+    save_dir = NULL # ,
+    # markers_dir = NULL
+    ) {
   # Save check
-  if (save) {if (is.null(qsave_dir)) {stop("You must provide 'qsave_dir' when save = TRUE.")}
-    if (is.null(markers_dir)) {stop("You must provide 'markers_dir' when save = TRUE.")}
-    if (!dir.exists(qsave_dir)) {dir.create(qsave_dir, recursive = TRUE)}
-    if (!dir.exists(markers_dir)) {dir.create(markers_dir, recursive = TRUE)}
+  if (save) {if (is.null(save_dir)) {stop("You must provide 'qsave_dir' when save = TRUE.")}
+    # if (is.null(markers_dir)) {stop("You must provide 'markers_dir' when save = TRUE.")}
+    if (!dir.exists(save_dir)) {dir.create(qsave_dir, recursive = TRUE)}
+    # if (!dir.exists(markers_dir)) {dir.create(markers_dir, recursive = TRUE)}
   }
 
   # Process
@@ -57,54 +59,54 @@ process_integrated <- function(
     Seurat::RunTSNE(
       reduction = 'pca',
       dims = 1:30,
-      verbose = T) %>%
+      verbose = T) # %>%
     # When SCTransform is run, residuals of the gene expression are stored in the "scale.data" slot of the "SCT" assay.
     # PrepSCTFindMarkers ensures that the residual variance of the genes is appropriately scaled and stabilized before marker detection.
     # Run PrepSCTFindMarkers after clustering and before running FindAllMarkers.
-    Seurat::PrepSCTFindMarkers(
-      verbose = T)
-
-  Seurat::DefaultAssay(integrated_rna) <- 'SCT'
-
-  # Clustering
-  cluster_range = seq(range_start, range_end, by = range_step)
-  for (i in cluster_range) {
-    integrated_rna <- Seurat::FindClusters(
-      integrated_rna,
-      graph.name = 'RNA_snn',
-      resolution = i,
-      cluster.name = paste0("RNA_cluster_", i))
-  }
-
-  # Find markers
-  # The "SCT" assay contains normalized and variance-stabilized data suitable for identifying differentially expressed genes between clusters.
-  # The "integrated" assay is batch-corrected for alignment and not designed for marker detection as it may suppress biological variation in favor of alignment.
-  # only.pos = TRUE: Returns only positive markers (regions more accessible in the cluster).
-  # min.pct: Minimum fraction of cells expressing the feature in the cluster.
-  # logfc.threshold: Minimum log fold-change required to call a feature significant.
-  markers <- list()
-  for (i in cluster_range) {
-    cluster <- paste0('RNA_cluster_', i)
-    Seurat::Idents(integrated_rna) <- integrated_rna[[cluster]][,1]
-    markers[[cluster]] <- Seurat::FindAllMarkers(
-      integrated_rna,
-      assay = 'SCT',
-      slot = 'data',
-      only.pos = TRUE,
-      min.pct = 0.25,
-      logfc.threshold = 0.25)
-  }
+  #   Seurat::PrepSCTFindMarkers(
+  #     verbose = T)
+  # 
+  # Seurat::DefaultAssay(integrated_rna) <- 'SCT'
+  # 
+  # # Clustering
+  # cluster_range = seq(range_start, range_end, by = range_step)
+  # for (i in cluster_range) {
+  #   integrated_rna <- Seurat::FindClusters(
+  #     integrated_rna,
+  #     graph.name = 'RNA_snn',
+  #     resolution = i,
+  #     cluster.name = paste0("RNA_cluster_", i))
+  # }
+  # 
+  # # Find markers
+  # # The "SCT" assay contains normalized and variance-stabilized data suitable for identifying differentially expressed genes between clusters.
+  # # The "integrated" assay is batch-corrected for alignment and not designed for marker detection as it may suppress biological variation in favor of alignment.
+  # # only.pos = TRUE: Returns only positive markers (regions more accessible in the cluster).
+  # # min.pct: Minimum fraction of cells expressing the feature in the cluster.
+  # # logfc.threshold: Minimum log fold-change required to call a feature significant.
+  # markers <- list()
+  # for (i in cluster_range) {
+  #   cluster <- paste0('RNA_cluster_', i)
+  #   Seurat::Idents(integrated_rna) <- integrated_rna[[cluster]][,1]
+  #   markers[[cluster]] <- Seurat::FindAllMarkers(
+  #     integrated_rna,
+  #     assay = 'SCT',
+  #     slot = 'data',
+  #     only.pos = TRUE,
+  #     min.pct = 0.25,
+  #     logfc.threshold = 0.25)
+  # }
 
   preccesed_rna <- integrated_rna
 
   # Save object
-  if (save) {qs::qsave(preccesed_rna, file = file.path(qsave_dir, "processed_rna.qs"))
-  message('Saved processed integraed rna objec to ', file.path(qsave_dir, "processed_rna.qs"))
+  if (save) {qs::qsave(preccesed_rna, file = file.path(save_dir, "06__integrated_rna", suffix, ".qs"))
+  message('Saved processed integraed rna objec to ', file.path(save_dir, "06__integrated_rna", suffix, ".qs"))
 
-    for (name in names(markers)) {
-    write.csv(markers[[name]], file = file.path(markers_dir, paste0(name, "_markers.csv")))
-    message('Saved processed markers to ', file.path(markers_dir, paste0(name, "_markers.csv")))
-    }
+    # for (name in names(markers)) {
+    # write.csv(markers[[name]], file = file.path(markers_dir, paste0(name, "_markers", suffix, ".csv")))
+    # message('Saved processed markers to ', file.path(markers_dir, paste0(name, "_markers", suffix, ".csv")))
+    # }
   }
   return(preccesed_rna)
   }

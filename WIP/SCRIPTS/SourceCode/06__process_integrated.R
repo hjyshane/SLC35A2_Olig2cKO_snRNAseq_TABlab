@@ -19,6 +19,7 @@
 process_integrated <- function(
     integrated_rna,
     save = TRUE,
+    suffix = NULL,
     qsave_dir = NULL) {
   # Save check
   if (save) {if (is.null(qsave_dir)) {stop("You must provide 'qsave_dir' when save = TRUE.")}
@@ -58,8 +59,8 @@ process_integrated <- function(
 
   # Save object
   if (save) {
-    qs::qsave(integrated_rna, file = file.path(qsave_dir, "06_integrated_rna.qs"))
-    message('Saved processed integraed rna objec to ', file.path(qsave_dir, "06_integrated_rna.qs"))
+    qs::qsave(integrated_rna, file = file.path(qsave_dir, paste0("06__integrated_rna", suffix, ".qs")))
+    message('Saved processed integraed rna objec to ', file.path(qsave_dir,  paste0("06__integrated_rna", suffix, ".qs")))
     }
   return(integrated_rna)
 }

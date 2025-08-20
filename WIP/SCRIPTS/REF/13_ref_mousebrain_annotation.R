@@ -42,8 +42,8 @@ ref_mousebrain_annotation <- function(
     metadata = predictions)
 
   # Save object
-  if (save) {qs::qsave(sobj, file = file.path(save_dir, "09_ref_annotated_obj.qs"))
-    message('Saved reference annotated object to: ', file.path(save_dir, "09_ref_annotated_obj.qs"), ".")
+  if (save) {qs::qsave(sobj, file = file.path(save_dir, "09__ref_annotated_obj.qs"))
+    message('Saved reference annotated object to: ', file.path(save_dir, "09__ref_annotated_obj.qs"), ".")
   }
   return(sobj)
   }
