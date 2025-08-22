@@ -679,6 +679,11 @@ doublet_grouped <- integrated@meta.data %>%
   count(Doublet_Status)
 ```
 
+# Final QC
+```{r}
+# '~/SLC35A2_Olig2cKO_snRNA_JY/WIP/SCRIPTS/SourceCode/99_QCPlotting.R'
+```
+
 # Olig subset
 Proper subset and integration process
 ## Subset

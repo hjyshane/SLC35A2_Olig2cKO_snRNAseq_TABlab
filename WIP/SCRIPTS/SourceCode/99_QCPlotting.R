@@ -1,12 +1,13 @@
 #### directory ####
-qc_dir <- "./QC"
-if (!dir.exists(qc_dir)) {
-  dir.create(qc_dir, recursive = TRUE)
-  dir.create(file.path(qc_dir, "Plots"), recursive = TRUE)
-  }
+save_dir <- 
+  '~/SLC35A2_Olig2cKO_snRNA_JY/WIP'
+qsave_dir <- 
+  file.path(save_dir, "QSAVE")
+qc_dir    <- 
+  file.path(save_dir, "QC")
 
 # read object
-qcobject <- qs::qread("./QSAVE/10_metadata_edited_obj.qs")
+qcobject <- qs::qread(file.path(qsave_dir, "11__dbl_added.qs"))
 
 #### QC fueature plots ####
 mt_rna <- FeaturePlot(object = qcobject,
@@ -40,6 +41,7 @@ RNAqcplot <- mt_rna | nCount | nFeature
 ggsave(mt_rna, filename = file.path(qc_dir, "Plots", "mt_rna.png"), width = 8, height = 8, dpi = 300)
 ggsave(nCount, filename = file.path(qc_dir, "Plots", "nCount.png"), width = 8, height = 8, dpi = 300)
 ggsave(nFeature, filename = file.path(qc_dir, "Plots", "nFeature.png"), width = 8, height = 8, dpi = 300)
+ggsave(RNAqcplot, filename = file.path(qc_dir, "Plots", "qcFeaturePlot.png"), width = 16, height = 8, dpi = 300)
 
 #### matrics ####
 qc_metrics <- c( "nCount_RNA", "nFeature_RNA", "percent_mt_rna")
@@ -49,7 +51,7 @@ qc_thresholds <- list(c(1000, 25000), c(400, NA), c(NA, 5))
 qc_pass <- data.frame(
   RNA_count_pass = sum(qcobject$nCount_RNA >= 1000 & qcobject$nCount_RNA <= 25000),
   RNA_feature_pass = sum(qcobject$nFeature_RNA >= 400),
-  MT_percent_pass = sum(qcobject$percent_mt_rna <= 5),
+  MT_percent_pass = sum(qcobject$percent_mt_rna <= 5)
   )
 
 # Calculate percentages
@@ -66,10 +68,13 @@ summary <-
 write.csv(summary, file = paste0(qc_dir, "QC_matrics.csv"))
 
 #### Distribution ####
+Idents(qcobject) <- "CellTypes"
 p1 <- ggplot(qcobject@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = percent_mt_rna)) +
   geom_point(size = 0.5, alpha = 0.5) +
   scale_color_viridis_c() +
   theme_minimal() +
+  theme(legend.position = "inside",       
+        legend.position.inside = c(0.9, 0.1)) +
   labs(title = "RNA metrics",
        x = "UMI count",
        y = "Gene count",
@@ -77,32 +82,54 @@ p1 <- ggplot(qcobject@meta.data, aes(x = nCount_RNA, y = nFeature_RNA, color = p
 
 p2 <- ggplot(qcobject@meta.data, aes(x = orig.ident, y = nCount_RNA)) +
   geom_violin(aes(fill = orig.ident), show.legend = FALSE) +
-  geom_jitter(size = 0.1, alpha = 0.1) +
+  geom_jitter(size = 0.1, alpha = 0) +
   theme_minimal() +
   labs(title = "RNA count distribution",
-       x = "Sample",
+       x = NULL,
        y = "UMI count")
 
 p3 <- ggplot(qcobject@meta.data, aes(x = orig.ident, y = percent_mt_rna)) +
   geom_violin(aes(fill = orig.ident), show.legend = FALSE) +
-  geom_jitter(size = 0.1, alpha = 0.1) +
+  geom_jitter(size = 0.1, alpha = 0) +
   theme_minimal() +
   labs(title = "Mitochondrial percentage",
-       x = "Sample",
+       x = NULL,
        y = "Percent mitochondrial")
 
 
 # Combine plots
-combined_plot <- p1 + p2 + p3
-  plot_layout(guides = 'collect') & theme(legend.position = 'bottom')
+combined_plot <- p2 + p3 + p1 + 
+  plot_layout(guides = 'collect')
 
 # distribution plots
-p <- ggplot(qcobject@meta.data, aes(x = .data[[metric]])) +
+metric <- 'nFeature_RNA'
+p1 <- ggplot(qcobject@meta.data, aes(x = .data[[metric]])) +
   geom_histogram(bins = 100, fill = "blue", alpha = 0.7) +
   theme_minimal() +
   labs(title = paste(metric, "distribution"),
        x = metric,
        y = "Count")
 
-p <- p + geom_vline(xintercept = threshold_low, color = "red", linetype = "dashed")
-p <- p + geom_vline(xintercept = threshold_high, color = "red", linetype = "dashed")
+metric <- 'nCount_RNA'
+p2 <- ggplot(qcobject@meta.data, aes(x = .data[[metric]])) +
+  geom_histogram(bins = 100, fill = "blue", alpha = 0.7) +
+  theme_minimal() +
+  labs(title = paste(metric, "distribution"),
+       x = metric,
+       y = "Count")
+
+metric <- 'percent_mt_rna'
+p3 <- ggplot(qcobject@meta.data, aes(x = .data[[metric]])) +
+  geom_histogram(bins = 100, fill = "blue", alpha = 0.7) +
+  theme_minimal() +
+  labs(title = paste(metric, "distribution"),
+       x = metric,
+       y = "Count")
+c < -p1 + p2 + p3
+# p <- p + geom_vline(xintercept = 1000, color = "red", linetype = "dashed")
+# p <- p + geom_vline(xintercept = 25000, color = "red", linetype = "dashed")
+# p
+
+qc <- RNAqcplot / combined_plot / c 
+ggsave(qc, filename = file.path(qc_dir, "Plots", "qc.png"), width = 12, height = 8, dpi = 300)
+
