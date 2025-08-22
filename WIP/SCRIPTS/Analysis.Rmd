@@ -21,6 +21,7 @@ library(glmGamPoi)
 library(clusterProfiler)
 library(DoubletFinder)
 library(PCAtools)
+library(scater)
 
 # Pseudotime analysis
 library(slingshot)
@@ -1370,7 +1371,7 @@ differentiation/lineage commitment?
 papermarkers <- c("Npas1", "Clu", "Epas1", "Pnlip", "Ptprn", "Hes5", "Nrarp", "Notch", "Slc38a1")
 
 Idents(integrated_man_npc) <- "CellTypes2"
-fp <- FeaturePlot(integrated_man_npc, features = papermarkers, label = T, repel = T)
+fp <- FeaturePlot(integrated_man_npc, features = papermarkers, label = T, repel = T, reduction = 'umap')
 
 # save
 ggplot2::ggsave(fp, file = file.path(plot_dir, "FeaturePlot_OligManSub_papermarker.png"), width = 12, height = 12, dpi = 300)
@@ -1456,12 +1457,56 @@ ggsave(filename = file.path(plot_dir, "Trajectory", "bar.png"), plot = bar, widt
 
 ```
 
+
 ## Monocle 
 ```{r}
 
 ```
 
 ## Cell cyle socre
+```{r}
+# Read previous object if needed.
+# integrated_man_npc <- qs::qread(file.path(qsave_dir, "OligoSubset", "10__man_npc.qs"))
+
+DefaultAssay(integrated_man_npc) <- "RNA"
+
+# A list of cell cycle markers, from Tirosh et al, 2015, is loaded with Seurat.  We can segregate this list into markers of G2/M phase and markers of S phase (From Seurat Vignetts)
+s.genes <- cc.genes$s.genes
+g2m.genes <- cc.genes$g2m.genes
+
+# Case match
+s.genes <- CaseMatch(search = s.genes, match = rownames(integrated_man_npc))
+g2m.genes<- CaseMatch(search = g2m.genes, match = rownames(integrated_man_npc))
+
+# Score
+integrated_man_npc <- CellCycleScoring(integrated_man_npc, s.features = s.genes, g2m.features = g2m.genes, set.ident = TRUE)
+
+# overlap gene
+length(intersect(s.genes, rownames(integrated_man_npc)))
+length(intersect(g2m.genes, rownames(integrated_man_npc)))
+
+DimPlot(integrated_man_npc, label = T, group.by = "CellTypes2", split.by = "Phase", reduction = 'umap') 
+
+
+#
+integrated_test <- ScaleData(integrated_man_npc, vars.to.regress = c("S.Score", "G2M.Score")) 
+integrated_test <- RunPCA(integrated_test, features = VariableFeatures(integrated_test)) 
+integrated_test <- RunUMAP(integrated_test, dims = 1:30, reduction = 'pca')
+
+DimPlot(integrated_test, label = T, group.by = "CellTypes2", reduction = 'umap') 
+
+table <- integrated_test@meta.data %>%
+  select(CellTypes2, Phase) %>%
+  group_by(CellTypes2) %>% 
+  count(Phase) %>% 
+  pivot_longer(cols = c("G1", "G2M", "S"))
+
+prop <- prop.table(table(integrated_test@meta.data$CellTypes2, integrated_test@meta.data$Phase), margin=1)
+test <- chisq.test(table(integrated_test@meta.data$CellTypes2, integrated_test@meta.data$Phase))
+
+DimPlot(integrated_test, group.by = "Phase",  label = T, repel = T)
+```
+
 ```{r}
 
 ```
